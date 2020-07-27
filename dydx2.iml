@@ -8,5 +8,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="ShadowComm" exported="" />
+    <orderEntry type="module" module-name="Logger" exported="" />
   </component>
 </module>
