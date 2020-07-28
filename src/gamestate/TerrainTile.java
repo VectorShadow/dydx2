@@ -2,6 +2,7 @@ package gamestate;
 
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameItem;
+import gamestate.gameobject.GameProjectile;
 import gamestate.gameobject.TerrainFeature;
 
 import java.util.ArrayList;
@@ -22,10 +23,14 @@ public class TerrainTile {
     //list all actors on this tile
     final ArrayList<GameActor> actorList;
 
+    //list all direct projectiles on this tile
+    final ArrayList<GameProjectile> projectileList;
+
     public TerrainTile(int id) {
         ID = (short)id;
         terrainFeature = null;
         itemList = new ArrayList<>();
         actorList = new ArrayList<>();
+        projectileList = new ArrayList<>();
     }
 }
