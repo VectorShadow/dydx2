@@ -3,7 +3,6 @@ package gamestate;
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameProjectile;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,20 +24,26 @@ public class GameZone {
     final TerrainTile[][] terrainMap;
 
     /**
-     * Store all actors active on this level,
+     * Provide a constant time reference to all actors in this Zone by their unique serial ID.
+     * This is achieved by mapping the serial ID values to the actors using the hash function implemented in
+     * SerialGameObject.
+     * Note that actors are also tracked by each tile individually, and can be referenced by those tile coordinates
+     * as well if that is desireable.
      */
     final Map actorMap;
 
     /**
-     * List all projectiles currently in motion on this map.
+     * Provide a constant time reference to all projectiles in this Zone by their unique serial ID.
+     * This is achieved by mapping the serial ID values to the projectiles using the hash function implemented in
+     * SerialGameObject.
      */
-    final ArrayList<GameProjectile> projectileList;
+    final Map projectileList;
 
     GameZone(int height, int width) {
         ROWS = height;
         COLUMNS = width;
         terrainMap = new TerrainTile[ROWS][COLUMNS];
         actorMap = Collections.synchronizedMap(new HashMap<Integer, GameActor>());
-        projectileList = new ArrayList<>();
+        projectileList = Collections.synchronizedMap(new HashMap<Integer, GameProjectile>());
     }
 }
