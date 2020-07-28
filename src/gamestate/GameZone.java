@@ -28,7 +28,7 @@ public class GameZone {
      * This is achieved by mapping the serial ID values to the actors using the hash function implemented in
      * SerialGameObject.
      * Note that actors are also tracked by each tile individually, and can be referenced by those tile coordinates
-     * as well if that is desireable.
+     * as well if that is preferable.
      */
     final Map actorMap;
 
@@ -36,6 +36,9 @@ public class GameZone {
      * Provide a constant time reference to all projectiles in this Zone by their unique serial ID.
      * This is achieved by mapping the serial ID values to the projectiles using the hash function implemented in
      * SerialGameObject.
+     * Note that projectiles, at least those travelling in a direct trajectory, rather than an indirect one, are
+     * tracked by their coordinates, and can be accessed by the tile they are currently in, as well, if that is
+     * preferable.
      */
     final Map projectileList;
 
