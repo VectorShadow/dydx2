@@ -7,9 +7,6 @@ import java.io.Serializable;
  */
 public abstract class GameObject implements Serializable {
 
-    //provide a value for hashing uniqueID'd game objects.
-    protected static final int HASH_CONSTANT = 256;
-
     //all data fields for this GameObject. Primitives are stored as their wrapper classes.
     protected final Object[] fields;
 

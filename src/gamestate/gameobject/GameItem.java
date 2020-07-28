@@ -2,10 +2,7 @@ package gamestate.gameobject;
 
 /**
  * Define an Item which can appear within a GameZone.
+ * Implementations should extend this, defining fields according to their needs.
  */
-public class GameItem extends GameObject {
-    @Override
-    protected Object[] declareFields() {
-        return new Object[0];
-    }
+public abstract class GameItem extends GameObject {
 }

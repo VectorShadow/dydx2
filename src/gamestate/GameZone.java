@@ -16,21 +16,29 @@ public class GameZone {
     /**
      * Specify the size of the GameZone.
      */
-    int rows;
-    int columns;
+    final int ROWS;
+    final int COLUMNS;
 
     /**
      * Define the terrain within the GameZone.
      */
-    TerrainTile[][] terrainMap;
+    final TerrainTile[][] terrainMap;
 
     /**
      * Store all actors active on this level,
      */
-    Map actorMap = Collections.synchronizedMap(new HashMap<Integer, GameActor>());
+    final Map actorMap;
 
     /**
      * List all projectiles currently in motion on this map.
      */
-    ArrayList<GameProjectile> projectileList;
+    final ArrayList<GameProjectile> projectileList;
+
+    GameZone(int height, int width) {
+        ROWS = height;
+        COLUMNS = width;
+        terrainMap = new TerrainTile[ROWS][COLUMNS];
+        actorMap = Collections.synchronizedMap(new HashMap<Integer, GameActor>());
+        projectileList = new ArrayList<>();
+    }
 }

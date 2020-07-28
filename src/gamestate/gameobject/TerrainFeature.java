@@ -2,10 +2,8 @@ package gamestate.gameobject;
 
 /**
  * Define a special terrain feature on a tile.
+ * Implementations should extend this, defining fields according to their needs.
  */
-public class TerrainFeature extends GameObject {
-    @Override
-    protected Object[] declareFields() {
-        return new Object[0];
-    }
+public abstract class TerrainFeature extends GameObject {
+
 }
