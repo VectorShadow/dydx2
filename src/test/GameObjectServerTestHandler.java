@@ -1,6 +1,6 @@
 package test;
 
-import gamestate.GameObject;
+import gamestate.gameobject.GameObject;
 import link.DataHandler;
 import link.DataLink;
 import link.instructions.InstructionDatum;

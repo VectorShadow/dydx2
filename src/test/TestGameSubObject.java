@@ -1,6 +1,6 @@
 package test;
 
-import gamestate.GameObject;
+import gamestate.gameobject.GameObject;
 
 public class TestGameSubObject extends GameObject {
 

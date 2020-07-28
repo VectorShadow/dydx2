@@ -1,6 +1,6 @@
 package test;
 
-import gamestate.GameObject;
+import gamestate.gameobject.GameObject;
 import link.instructions.InstructionDatum;
 
 public class GameObjectTestInstruction extends InstructionDatum {
