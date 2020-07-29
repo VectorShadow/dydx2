@@ -6,7 +6,7 @@ package gamestate.gameobject;
  */
 public abstract class GameProjectile extends SerialGameObject {
 
-    private static int serialCount;
+    private static int serialCount = 0;
 
     @Override
     protected int nextSerialID() {

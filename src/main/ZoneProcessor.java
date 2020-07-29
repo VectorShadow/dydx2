@@ -1,6 +1,11 @@
 package main;
 
+import event.Event;
 import gamestate.GameZone;
+import gamestate.gameobject.GameActor;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * A sub-engine which processes all events for a particular zone.
@@ -16,7 +21,12 @@ public class ZoneProcessor {
     /**
      * Process all events scheduled for this turn.
      */
-    public void processTurn(){
-        //todo
+    void processTurn(){
+        ArrayList<Event> eventQueue = new ArrayList<>();
+        for (GameActor ga : GAME_ZONE.listActors()) {
+            eventQueue.addAll(ga.scheduleEvents());
+        }
+        eventQueue.sort(Comparator.naturalOrder());
+        //todo - execute the events... how do we do this?
     }
 }
