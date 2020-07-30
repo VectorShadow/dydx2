@@ -1,9 +1,9 @@
-package gamestate;
+package gamestate.terrain;
 
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameItem;
 import gamestate.gameobject.GameProjectile;
-import gamestate.gameobject.TerrainFeature;
+import gamestate.gameobject.SerialGameObject;
 
 import java.util.ArrayList;
 
@@ -12,19 +12,19 @@ import java.util.ArrayList;
  */
 public class TerrainTile {
     //this value provides implementation specific lookup information
-    short ID;
+    public short ID;
 
     //define whether there is an interactive terrain feature here
-    TerrainFeature terrainFeature;
+    public TerrainFeature terrainFeature;
 
     //list all objects on this tile
-    final ArrayList<GameItem> itemList;
+    public final ArrayList<GameItem> itemList;
 
     //list all actors on this tile
-    final ArrayList<GameActor> actorList;
+    public final ArrayList<SerialGameObject> actorList;
 
     //list all direct projectiles on this tile
-    final ArrayList<GameProjectile> projectileList;
+    public final ArrayList<SerialGameObject> projectileList;
 
     public TerrainTile(int id) {
         ID = (short)id;

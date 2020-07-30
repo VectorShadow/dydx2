@@ -1,5 +1,7 @@
 package event;
 
+import gamestate.GameZone;
+
 /**
  * An event which changes the gamestate.
  */
@@ -27,5 +29,7 @@ public abstract class Event implements Comparable<Event> {
     public int compareTo(Event e) {
         return XO.compareTo(e.XO);
     }
+
+    public abstract void execute(GameZone gz);
 
 }

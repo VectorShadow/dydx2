@@ -3,6 +3,7 @@ package main;
 import event.Event;
 import gamestate.GameZone;
 import gamestate.gameobject.GameActor;
+import gamestate.gameobject.GameProjectile;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,10 +24,12 @@ public class ZoneProcessor {
      */
     void processTurn(){
         ArrayList<Event> eventQueue = new ArrayList<>();
-        for (GameActor ga : GAME_ZONE.listActors()) {
+        for (GameActor ga : GAME_ZONE.getActorList())
             eventQueue.addAll(ga.scheduleEvents());
-        }
+        for (GameProjectile ga : GAME_ZONE.getProjectileList())
+            ;
         eventQueue.sort(Comparator.naturalOrder());
-        //todo - execute the events... how do we do this?
+        for (Event e : eventQueue)
+            e.execute(GAME_ZONE);
     }
 }

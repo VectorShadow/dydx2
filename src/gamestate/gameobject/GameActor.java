@@ -18,6 +18,12 @@ public abstract class GameActor extends SerialGameObject {
     }
 
     /**
+     * @return the movement access level of this actor. This must be a value between 1 and 6.
+     * (see TerrainProperties for more information)
+     */
+    public abstract int getMovementAccess();
+
+    /**
      * The engine will call this method for each actor at the start of every game turn.
      * The implementation must decide how to determine what events should be scheduled here.
      */
