@@ -1,9 +1,13 @@
 package event;
 
 import gamestate.GameZone;
+import gamestate.GameZoneUpdate;
 import gamestate.coordinates.PointCoordinate;
 import gamestate.coordinates.TileCoordinate;
 import gamestate.gameobject.GameActor;
+import main.LogHub;
+
+import java.util.ArrayList;
 
 public class ActorMovementEvent extends Event {
 
@@ -20,7 +24,23 @@ public class ActorMovementEvent extends Event {
     }
 
     @Override
-    public void execute(GameZone gz) {
-        gz.moveActor(ACTOR, DESTINATION);
+    public ArrayList<GameZoneUpdate> execute() {
+        ArrayList<GameZoneUpdate> updateList = new ArrayList<>();
+        try {
+            updateList.add(
+                    new GameZoneUpdate(
+                            GameZone.class.getDeclaredMethod(
+                                    "moveActor",
+                                    GameActor.class,
+                                    PointCoordinate.class
+                            ),
+                            ACTOR,
+                            DESTINATION
+                    )
+            );
+        } catch (NoSuchMethodException e) {
+            LogHub.logFatalCrash("No such method", e);
+        }
+        return updateList;
     }
 }

@@ -1,6 +1,9 @@
 package event;
 
+import gamestate.GameZoneUpdate;
 import gamestate.GameZone;
+
+import java.util.ArrayList;
 
 /**
  * An event which changes the gamestate.
@@ -30,6 +33,6 @@ public abstract class Event implements Comparable<Event> {
         return XO.compareTo(e.XO);
     }
 
-    public abstract void execute(GameZone gz);
+    public abstract ArrayList<GameZoneUpdate> execute();
 
 }

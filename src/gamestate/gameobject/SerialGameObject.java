@@ -28,6 +28,10 @@ public abstract class SerialGameObject extends GameObject {
         return at;
     }
 
+    public int getSerialID() {
+        return serialID;
+    }
+
     protected abstract int nextSerialID();
 
     public void setAt(PointCoordinate at) {

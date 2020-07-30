@@ -3,6 +3,9 @@ package main;
 import link.DataLink;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * DisIntegration Engine v2.
@@ -51,6 +54,13 @@ public class Engine extends Thread {
     private final ArrayList<ZoneProcessor> ZONE_PROCESSORS;
 
     /**
+     * A mapping of active ZoneProcessors to a list of connected DataLinks.
+     * This allows us to find all the links we need to transmit GameZoneUpdates on for each Zone.
+     */
+    //todo - we need a better structure for mapping zones to links and vice versa, iot handle checksums and such.
+    private final Map ZONE_TO_LINKS_MAP;
+
+    /**
      * Specify whether this engine is linked remotely or locally.
      */
     private final boolean IS_REMOTE;
@@ -63,12 +73,21 @@ public class Engine extends Thread {
          */
         IS_REMOTE = CONNECTIONS.isEmpty();
         ZONE_PROCESSORS = new ArrayList<>();
+        ZONE_TO_LINKS_MAP = Collections.synchronizedMap(new HashMap<ZoneProcessor, ArrayList<DataLink>>());
     }
 
     public void run() {
         if (turnTime > 0)
             nextTurnStart = System.currentTimeMillis() + turnTime;
         executionLoop();
+    }
+
+    //todo - we need a better structure for mapping zones to links and vice versa.
+    // in particular, we need to make sure this method returns, at minimum, an empty array list,
+    // as the current Map implementation will actually return null, causing a crash when a ZoneProcessor
+    // calls this method.
+    ArrayList<DataLink> getZoneConnections(ZoneProcessor zp) {
+        return IS_REMOTE ? (ArrayList<DataLink>) ZONE_TO_LINKS_MAP.get(zp) : CONNECTIONS;
     }
 
     private void executionLoop() {
