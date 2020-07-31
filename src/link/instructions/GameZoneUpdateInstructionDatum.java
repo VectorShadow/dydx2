@@ -1,6 +1,6 @@
 package link.instructions;
 
-import gamestate.GameZoneUpdate;
+import gamestate.gamezone.GameZoneUpdate;
 
 import java.util.ArrayList;
 

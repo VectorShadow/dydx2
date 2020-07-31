@@ -2,8 +2,8 @@ package main;
 
 import event.Event;
 import event.ProjectileMovementEvent;
-import gamestate.GameZone;
-import gamestate.GameZoneUpdate;
+import gamestate.gamezone.GameZone;
+import gamestate.gamezone.GameZoneUpdate;
 import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameProjectile;

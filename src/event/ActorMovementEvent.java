@@ -1,7 +1,7 @@
 package event;
 
-import gamestate.GameZone;
-import gamestate.GameZoneUpdate;
+import gamestate.gamezone.GameZone;
+import gamestate.gamezone.GameZoneUpdate;
 import gamestate.coordinates.PointCoordinate;
 import gamestate.coordinates.TileCoordinate;
 import gamestate.gameobject.GameActor;

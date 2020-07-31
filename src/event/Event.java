@@ -1,7 +1,6 @@
 package event;
 
-import gamestate.GameZoneUpdate;
-import gamestate.GameZone;
+import gamestate.gamezone.GameZoneUpdate;
 
 import java.util.ArrayList;
 

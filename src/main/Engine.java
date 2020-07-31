@@ -72,7 +72,7 @@ public class Engine extends Thread {
 
     private void executionLoop() {
         for (;;) {
-            if (++turnCount % (60 * TURN_TIME_SECOND / turnTime) == 0) audit(); //audit the aggregator every minute
+            if (++turnCount % (TURN_TIME_SECOND / turnTime) == 0) audit(); //audit the aggregator once per second
             ZONE_LINK_AGGREGATOR.processAll();
             if (turnTime > 0) {
                 nextTurnStart += turnTime;
@@ -108,7 +108,7 @@ public class Engine extends Thread {
      * Then check each active zone processor to ensure it still has an active connection attached.
      */
     private void audit() {
+        ZONE_LINK_AGGREGATOR.placeZonelessLinks();
         ZONE_LINK_AGGREGATOR.purgeUnconnectedZoneProcessors();
-        //todo - possibly more here
     }
 }

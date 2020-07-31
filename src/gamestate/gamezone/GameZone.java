@@ -1,4 +1,4 @@
-package gamestate;
+package gamestate.gamezone;
 
 import gamestate.coordinates.PointCoordinate;
 import gamestate.coordinates.TileCoordinate;

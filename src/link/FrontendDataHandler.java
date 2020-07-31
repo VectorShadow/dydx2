@@ -1,7 +1,7 @@
 package link;
 
-import gamestate.GameZone;
-import gamestate.GameZoneUpdate;
+import gamestate.gamezone.GameZone;
+import gamestate.gamezone.GameZoneUpdate;
 import link.instructions.GameZoneUpdateInstructionDatum;
 import link.instructions.InstructionDatum;
 

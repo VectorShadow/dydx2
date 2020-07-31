@@ -1,10 +1,13 @@
 package main;
 
-import gamestate.GameZone;
+import definitions.DefinitionsManager;
+import gamestate.gamezone.GameZone;
 import gamestate.coordinates.ZoneCoordinate;
 import link.DataLink;
 
 import java.util.ArrayList;
+
+import static main.LiveLog.LogEntryPriority.*;
 
 /**
  * ZoneProcessorDataLinkAggregator provides utilities for organizing and managing DataLinks and ZoneProcessors.
@@ -31,42 +34,34 @@ public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
      * Add a new ZoneProcessor to the ZoneProcessorDataLinkAggregator.
      * This should only be done after querying the ZoneCoordinate via contains(), finding no existing ZoneProcessor,
      * and requesting a Zone be generated for that coordinate.
-     * @param dataLink the DataLink connecting to the new Zone.
-     * @param gameZone the newly generated GameZone.
-     * @param zoneCoordinate the ZoneCoordinate of the GameZone.
+     * @param dl the DataLink connecting to the new Zone.
+     * @param gz the newly generated GameZone.
+     * @param zc the ZoneCoordinate of the GameZone.
      */
-    public void addZoneProcessor(DataLink dataLink, GameZone gameZone, ZoneCoordinate zoneCoordinate) {
-        if (contains(zoneCoordinate))
-            throw new IllegalArgumentException("Zone Coordinate " + zoneCoordinate + " already exists.");
-        ZoneNode zpn = new ZoneNode(zoneCoordinate, gameZone);
-        DataLinkNode dln = get(dataLink);
+    public void addZoneProcessor(DataLink dl, GameZone gz, ZoneCoordinate zc) {
+        ZoneNode zpn = new ZoneNode(zc, gz);
+        DataLinkNode dln = get(dl);
         dln.zpn = zpn;
         zpn.LINKS.add(dln);
         zoneNodes.add(zpn);
+        LiveLog.log("Connected dataLink to new Zone at " + zc + ". ", INFO);
     }
 
     /**
      * Connect a DataLink to an existing ZoneProcessor.
      * This should only be done after querying the ZoneCoordinate and finding it exists.
      */
-    public void connect(DataLink dl, ZoneCoordinate zc) {
-        if (!contains(zc))
-            throw new IllegalArgumentException("Zone Coordinate " + zc + " did not exist.");
+    private void connect(DataLink dl, ZoneCoordinate zc) {
         DataLinkNode dln = get(dl);
         dln.zpn.LINKS.remove(dln);
         ZoneNode zpn = get(zc);
         dln.zpn = zpn;
         zpn.LINKS.add(dln);
-    }
-
-    /**
-     * @return whether a ZoneProcessor exists for the specified ZoneCoordinate.
-     */
-    public boolean contains(ZoneCoordinate zc) {
-        for (ZoneNode zpn : zoneNodes) {
-            if (zpn.COORD.equals(zc)) return true;
-        }
-        return false;
+        LiveLog.log(
+                "Connected dataLink to existing Zone at " + zc + ". Zone now has " + zpn.LINKS.size() +
+                " connected DataLinks.",
+                INFO
+        );
     }
 
     /**
@@ -86,17 +81,41 @@ public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
         for (ZoneNode zpn : zoneNodes) {
             if (zpn.COORD.equals(zc)) return zpn;
         }
-        throw new IllegalStateException("ZoneCoordinate " + zc + " not found.");
+        return null;
     }
 
-    public void processAll() {
+    /**
+     * Attempt to load a Zone for each DataLink that isn't yet connected to one.
+     */
+    void placeZonelessLinks() {
+        for (DataLinkNode dln : dataLinkNodes) {
+            if (dln.zpn == null) {
+                DataLink dl = dln.LINK;
+                //todo - links should connect to a player account, and eventually select a character.
+                // Once this is set, the character will contain ZoneCoordinates, and these should be used to place
+                // the character in either an existing zone or a new one. For now, make a new one:
+                ZoneCoordinate zc = new ZoneCoordinate(
+                        0,
+                        ZoneCoordinate.SURFACE_DEPTH,
+                        ZoneCoordinate.GLOBAL_INSTANCE
+                );
+                ZoneNode zn = get(zc);
+                if (zn == null) {
+                    addZoneProcessor(dl, DefinitionsManager.generateZone(zc), zc);
+                } else {
+                    connect(dl, zc);
+                }
+            }
+        }
+    }
+    void processAll() {
         for (ZoneNode zpn : zoneNodes) zpn.processTurn();
     }
 
     /**
      * Remove all ZoneProcessors which are no longer connected to a DataLink.
      */
-    public void purgeUnconnectedZoneProcessors() {
+    void purgeUnconnectedZoneProcessors() {
         zoneNodes.removeIf(zpn -> zpn.LINKS.size() == 0);
     }
 }

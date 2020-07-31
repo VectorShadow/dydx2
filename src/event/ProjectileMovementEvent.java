@@ -1,7 +1,7 @@
 package event;
 
-import gamestate.GameZone;
-import gamestate.GameZoneUpdate;
+import gamestate.gamezone.GameZone;
+import gamestate.gamezone.GameZoneUpdate;
 import gamestate.gameobject.GameProjectile;
 import main.LogHub;
 
