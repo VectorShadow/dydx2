@@ -91,6 +91,10 @@ public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
         for (DataLinkNode dln : dataLinkNodes) {
             if (dln.zpn == null) {
                 DataLink dl = dln.LINK;
+                //do not attempt to place this link in a zone until encryption has been established.
+                //todo - we can probably remove this check once we assign accounts to links, since encryption
+                // MUST be established before that happens.
+                if (!dl.isEncrypted()) continue;
                 //todo - links should connect to a player account, and eventually select a character.
                 // Once this is set, the character will contain ZoneCoordinates, and these should be used to place
                 // the character in either an existing zone or a new one. For now, make a new one:
