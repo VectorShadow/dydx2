@@ -11,7 +11,7 @@ public class BackendDataHandler extends DataHandler {
     }
 
     @Override
-    protected void handle(int instructionCode, InstructionDatum instructionDatum, DataLink responseLink) {
+    protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
         //todo
     }
 }

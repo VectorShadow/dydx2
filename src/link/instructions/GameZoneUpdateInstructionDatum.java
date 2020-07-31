@@ -13,9 +13,4 @@ public class GameZoneUpdateInstructionDatum extends InstructionDatum {
     public GameZoneUpdateInstructionDatum(ArrayList<GameZoneUpdate> updateList) {
         UPDATE_LIST = updateList;
     }
-
-    @Override
-    protected int getInstructionCode() {
-        return Codes.ENGINE_INSTRUCTION_CODE_TRANSMIT_GAME_ZONE_UPDATE;
-    }
 }

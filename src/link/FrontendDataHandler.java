@@ -2,7 +2,6 @@ package link;
 
 import gamestate.GameZone;
 import gamestate.GameZoneUpdate;
-import link.instructions.Codes;
 import link.instructions.GameZoneUpdateInstructionDatum;
 import link.instructions.InstructionDatum;
 
@@ -15,16 +14,14 @@ public class FrontendDataHandler extends DataHandler {
     }
 
     @Override
-    protected void handle(int instructionCode, InstructionDatum instructionDatum, DataLink responseLink) {
-        switch (instructionCode) {
-            case Codes.ENGINE_INSTRUCTION_CODE_TRANSMIT_GAME_ZONE_UPDATE:
-                for (GameZoneUpdate gzu :((GameZoneUpdateInstructionDatum)instructionDatum).UPDATE_LIST)
-                    GameZone.frontEnd.apply(gzu);
-                //todo - send back a checksum
-                break;
+    protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
+        if (instructionDatum instanceof GameZoneUpdateInstructionDatum) {
+            for (GameZoneUpdate gzu : ((GameZoneUpdateInstructionDatum) instructionDatum).UPDATE_LIST)
+                GameZone.frontEnd.apply(gzu);
+            //todo - send back a checksum
+        } else {
                 //todo - more cases
-            default:
-                throw new IllegalArgumentException("Unhandled instruction code " + instructionCode);
+                throw new IllegalArgumentException("Unhandled InstructionDatum class: " + instructionDatum.getClass());
         }
     }
 }
