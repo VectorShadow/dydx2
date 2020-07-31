@@ -1,5 +1,7 @@
 package main;
 
+import static main.LiveLog.LogEntryPriority.*;
+
 /**
  * DisIntegration Engine v2.
  */
@@ -75,9 +77,7 @@ public class Engine extends Thread {
             if (turnTime > 0) {
                 nextTurnStart += turnTime;
                 long timeUntilNextTurn = nextTurnStart - System.currentTimeMillis();
-                if (timeUntilNextTurn < 0) //todo - handle this by dynamically adjusting turn times?
-                    throw new IllegalStateException("Turn execution time exceeded allotted turn time: " +
-                            (turnTime - timeUntilNextTurn) + " > " + turnTime);
+                validateTime(timeUntilNextTurn);
                 try {
                     Thread.sleep(timeUntilNextTurn);
                 } catch (InterruptedException e) {
@@ -86,6 +86,20 @@ public class Engine extends Thread {
             } else {
                 //todo - handle negative turn time constants appropriately
             }
+        }
+    }
+
+    private void validateTime(long timeUntilNextTurn) {
+        if (timeUntilNextTurn < 0) { //throw a (fatal) exception if the turn execution exceeded its allotted time
+            //todo - handle this by dynamically adjusting turn times?
+            throw new IllegalStateException("Turn execution time exceeded allotted turn time: " +
+                    (turnTime - timeUntilNextTurn) + " > " + turnTime);
+        } else if (timeUntilNextTurn < turnTime / 4) { //log a warning if a turn takes the bulk of its allotted time
+            LiveLog.log("Turn took more than 75% of allotted time.", WARNING);
+        } else if (timeUntilNextTurn < turnTime / 2) { //log an alert if the turn takes at least half of its allotted time
+            LiveLog.log("Turn took more than 50% of allotted time.", ALERT);
+        } else if (turnCount % 32 == 0) { //occasionally log acceptable turn execution times as info
+            LiveLog.log("Turn took " + (turnTime - timeUntilNextTurn) + "ms.", INFO);
         }
     }
 
