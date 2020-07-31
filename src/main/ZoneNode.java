@@ -15,7 +15,7 @@ import java.util.Comparator;
 /**
  * Track a ZoneProcessor and all DataLinks currently connected to it.
  */
-class ZoneProcessorNode {
+class ZoneNode {
 
     /**
      * A sub-engine which processes all events for a particular zone.
@@ -61,7 +61,7 @@ class ZoneProcessorNode {
     final ArrayList<DataLinkNode> LINKS;
     private final ZoneProcessor PROCESSOR;
 
-    ZoneProcessorNode(ZoneCoordinate zc, GameZone gz) {
+    ZoneNode(ZoneCoordinate zc, GameZone gz) {
         COORD = zc;
         LINKS = new ArrayList<>();
         PROCESSOR = new ZoneProcessor(gz);

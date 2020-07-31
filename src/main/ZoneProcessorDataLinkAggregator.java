@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
 
     private ArrayList<DataLinkNode> dataLinkNodes = new ArrayList<>();
-    private ArrayList<ZoneProcessorNode> zoneProcessorNodes = new ArrayList<>();
+    private ArrayList<ZoneNode> zoneNodes = new ArrayList<>();
 
     /**
      * Add a new DataLink to the ZoneProcessorDataLinkAggregator.
@@ -27,10 +27,6 @@ public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
         return dataLinkNodes.size();
     }
 
-    int countProcessors() {
-        return zoneProcessorNodes.size();
-    }
-
     /**
      * Add a new ZoneProcessor to the ZoneProcessorDataLinkAggregator.
      * This should only be done after querying the ZoneCoordinate via contains(), finding no existing ZoneProcessor,
@@ -42,11 +38,11 @@ public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
     public void addZoneProcessor(DataLink dataLink, GameZone gameZone, ZoneCoordinate zoneCoordinate) {
         if (contains(zoneCoordinate))
             throw new IllegalArgumentException("Zone Coordinate " + zoneCoordinate + " already exists.");
-        ZoneProcessorNode zpn = new ZoneProcessorNode(zoneCoordinate, gameZone);
+        ZoneNode zpn = new ZoneNode(zoneCoordinate, gameZone);
         DataLinkNode dln = get(dataLink);
         dln.zpn = zpn;
         zpn.LINKS.add(dln);
-        zoneProcessorNodes.add(zpn);
+        zoneNodes.add(zpn);
     }
 
     /**
@@ -58,7 +54,7 @@ public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
             throw new IllegalArgumentException("Zone Coordinate " + zc + " did not exist.");
         DataLinkNode dln = get(dl);
         dln.zpn.LINKS.remove(dln);
-        ZoneProcessorNode zpn = get(zc);
+        ZoneNode zpn = get(zc);
         dln.zpn = zpn;
         zpn.LINKS.add(dln);
     }
@@ -67,7 +63,7 @@ public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
      * @return whether a ZoneProcessor exists for the specified ZoneCoordinate.
      */
     public boolean contains(ZoneCoordinate zc) {
-        for (ZoneProcessorNode zpn : zoneProcessorNodes) {
+        for (ZoneNode zpn : zoneNodes) {
             if (zpn.COORD.equals(zc)) return true;
         }
         return false;
@@ -84,23 +80,23 @@ public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
     }
 
     /**
-     * @return the ZoneProcessorNode corresponding to the specified ZoneCoordinate.
+     * @return the ZoneNode corresponding to the specified ZoneCoordinate.
      */
-    private ZoneProcessorNode get(ZoneCoordinate zc) {
-        for (ZoneProcessorNode zpn : zoneProcessorNodes) {
+    private ZoneNode get(ZoneCoordinate zc) {
+        for (ZoneNode zpn : zoneNodes) {
             if (zpn.COORD.equals(zc)) return zpn;
         }
         throw new IllegalStateException("ZoneCoordinate " + zc + " not found.");
     }
 
     public void processAll() {
-        for (ZoneProcessorNode zpn : zoneProcessorNodes) zpn.processTurn();
+        for (ZoneNode zpn : zoneNodes) zpn.processTurn();
     }
 
     /**
      * Remove all ZoneProcessors which are no longer connected to a DataLink.
      */
     public void purgeUnconnectedZoneProcessors() {
-        zoneProcessorNodes.removeIf(zpn -> zpn.LINKS.size() == 0);
+        zoneNodes.removeIf(zpn -> zpn.LINKS.size() == 0);
     }
 }

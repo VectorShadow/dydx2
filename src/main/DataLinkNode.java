@@ -8,7 +8,7 @@ import link.DataLink;
 class DataLinkNode {
 
     final DataLink LINK;
-    ZoneProcessorNode zpn;
+    ZoneNode zpn;
 
     DataLinkNode(DataLink dataLink) {
         LINK = dataLink;
