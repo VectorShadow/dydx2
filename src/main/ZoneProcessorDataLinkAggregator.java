@@ -94,7 +94,7 @@ public class ZoneProcessorDataLinkAggregator implements DataLinkAggregator{
     }
 
     public void processAll() {
-        for (ZoneProcessorNode zpn : zoneProcessorNodes) zpn.PROCESSOR.processTurn();
+        for (ZoneProcessorNode zpn : zoneProcessorNodes) zpn.processTurn();
     }
 
     /**
