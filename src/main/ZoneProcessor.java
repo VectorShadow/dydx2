@@ -6,10 +6,8 @@ import gamestate.GameZone;
 import gamestate.GameZoneUpdate;
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameProjectile;
-import link.DataLink;
 import link.instructions.GameZoneUpdateInstructionDatum;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -18,12 +16,12 @@ import java.util.Comparator;
  */
 public class ZoneProcessor {
 
-    private final Engine ENGINE;
     private final GameZone GAME_ZONE;
+    private final ZoneProcessorNode PARENT_NODE;
 
-    public ZoneProcessor(Engine eng, GameZone gz) {
-        ENGINE = eng;
+    public ZoneProcessor(GameZone gz, ZoneProcessorNode pn) {
         GAME_ZONE = gz;
+        PARENT_NODE = pn;
     }
 
     /**
@@ -51,7 +49,7 @@ public class ZoneProcessor {
             }
         }
         //transmit all updates on all data links connected to this zone processor
-        for (DataLink dl : ENGINE.getZoneConnections(this))
-            dl.transmit(new GameZoneUpdateInstructionDatum(turnUpdates));
+        for (DataLinkNode dln : PARENT_NODE.LINKS)
+            dln.LINK.transmit(new GameZoneUpdateInstructionDatum(turnUpdates));
     }
 }

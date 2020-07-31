@@ -1,12 +1,5 @@
 package main;
 
-import link.DataLink;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * DisIntegration Engine v2.
  */
@@ -36,6 +29,7 @@ public class Engine extends Thread {
      * and class II interrupts.
      */
     private static final long TURN_TIME_DEFAULT = 250;
+    private static final long TURN_TIME_SECOND = 1_000;
     private static final long TURN_TIME_ACTION_AVAILABLE = -1;
     private static final long TURN_TIME_EXECUTE_ORDERS = -2;
     private static final long TURN_TIME_PASS_TIME = -3;
@@ -46,34 +40,26 @@ public class Engine extends Thread {
 
     /**
      * A list of active connections on data links.
-     * In a remote configuration, this points to the same list the Server which instantiated the Engine uses to track
-     * its active connections.
-     * In a local configuration, the first and only element of the list is the link to the frontend.
+     * In a remote configuration, this contains a number of links corresponding to all active client connections,
+     * but is instantiated with no connections.
+     * In a local configuration, it will only ever contain a single link to the local frontend.
      */
-    private final ArrayList<DataLink> CONNECTIONS;
-    private final ArrayList<ZoneProcessor> ZONE_PROCESSORS;
-
-    /**
-     * A mapping of active ZoneProcessors to a list of connected DataLinks.
-     * This allows us to find all the links we need to transmit GameZoneUpdates on for each Zone.
-     */
-    //todo - we need a better structure for mapping zones to links and vice versa, iot handle checksums and such.
-    private final Map ZONE_TO_LINKS_MAP;
+    private final ZoneProcessorDataLinkAggregator ZONE_LINK_AGGREGATOR;
 
     /**
      * Specify whether this engine is linked remotely or locally.
      */
     private final boolean IS_REMOTE;
 
-    public Engine(ArrayList<DataLink> connections) {
-        CONNECTIONS = connections;
+    private int turnCount = 0;
+
+    public Engine(ZoneProcessorDataLinkAggregator zpdla) {
+        ZONE_LINK_AGGREGATOR = zpdla;
         /*
          * A server instantiating an remote engine will do so on startup, before it has accepted any connections.
          * A frontend instantiating a local engine will do so by providing the paired backend local link.
          */
-        IS_REMOTE = CONNECTIONS.isEmpty();
-        ZONE_PROCESSORS = new ArrayList<>();
-        ZONE_TO_LINKS_MAP = Collections.synchronizedMap(new HashMap<ZoneProcessor, ArrayList<DataLink>>());
+        IS_REMOTE = ZONE_LINK_AGGREGATOR.countLinks() > 0;
     }
 
     public void run() {
@@ -82,21 +68,10 @@ public class Engine extends Thread {
         executionLoop();
     }
 
-    //todo - we need a better structure for mapping zones to links and vice versa.
-    // in particular, we need to make sure this method returns, at minimum, an empty array list,
-    // as the current Map implementation will actually return null, causing a crash when a ZoneProcessor
-    // calls this method.
-    ArrayList<DataLink> getZoneConnections(ZoneProcessor zp) {
-        return IS_REMOTE ? (ArrayList<DataLink>) ZONE_TO_LINKS_MAP.get(zp) : CONNECTIONS;
-    }
-
     private void executionLoop() {
         for (;;) {
-            audit();
-            if (ZONE_PROCESSORS.size() > 0) {
-               for (ZoneProcessor zp : ZONE_PROCESSORS)
-                   zp.processTurn();
-            }
+            if (++turnCount % (60 * TURN_TIME_SECOND / turnTime) == 0) audit(); //audit the aggregator every minute
+            ZONE_LINK_AGGREGATOR.processAll();
             if (turnTime > 0) {
                 nextTurnStart += turnTime;
                 long timeUntilNextTurn = nextTurnStart - System.currentTimeMillis();
@@ -119,13 +94,7 @@ public class Engine extends Thread {
      * Then check each active zone processor to ensure it still has an active connection attached.
      */
     private void audit() {
-        //todo
-    }
-
-    private void addZoneProcessor(ZoneProcessor zp) {
-        ZONE_PROCESSORS.add(zp);
-    }
-    private void removeZoneProcessor(ZoneProcessor zp) {
-        ZONE_PROCESSORS.remove(zp);
+        ZONE_LINK_AGGREGATOR.purgeUnconnectedZoneProcessors();
+        //todo - possibly more here
     }
 }
