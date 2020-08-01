@@ -5,13 +5,13 @@ import link.DataLink;
 /**
  * Track a DataLink and the Zone it is connected to.
  */
-class DataLinkNode {
+class DataLinkSession {
 
     final DataLink LINK;
-    ZoneNode zpn;
+    ZoneSession zs;
 
-    DataLinkNode(DataLink dataLink) {
+    DataLinkSession(DataLink dataLink) {
         LINK = dataLink;
-        zpn = null;
+        zs = null;
     }
 }

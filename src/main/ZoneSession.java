@@ -15,7 +15,7 @@ import java.util.Comparator;
 /**
  * Track a ZoneProcessor and all DataLinks currently connected to it.
  */
-class ZoneNode {
+class ZoneSession {
 
     /**
      * A sub-engine which processes all events for a particular zone.
@@ -31,7 +31,7 @@ class ZoneNode {
         /**
          * Process all events scheduled for this turn.
          */
-        private void processTurn(ArrayList<DataLinkNode> linkNodes){
+        private void processTurn(ArrayList<DataLinkSession> linkNodes){
             ArrayList<Event> eventQueue = new ArrayList<>();
             //request events from all actors
             for (GameActor ga : GAME_ZONE.getActorList())
@@ -53,15 +53,15 @@ class ZoneNode {
                 }
             }
             //transmit all updates on all data links connected to this zone processor
-            for (DataLinkNode dln : linkNodes)
+            for (DataLinkSession dln : linkNodes)
                 dln.LINK.transmit(new GameZoneUpdateInstructionDatum(turnUpdates));
         }
     }
     final ZoneCoordinate COORD;
-    final ArrayList<DataLinkNode> LINKS;
+    final ArrayList<DataLinkSession> LINKS;
     private final ZoneProcessor PROCESSOR;
 
-    ZoneNode(ZoneCoordinate zc, GameZone gz) {
+    ZoneSession(ZoneCoordinate zc, GameZone gz) {
         COORD = zc;
         LINKS = new ArrayList<>();
         PROCESSOR = new ZoneProcessor(gz);

@@ -46,7 +46,7 @@ public class Engine extends Thread {
      * but is instantiated with no connections.
      * In a local configuration, it will only ever contain a single link to the local frontend.
      */
-    private final ZoneProcessorDataLinkAggregator ZONE_LINK_AGGREGATOR;
+    private final DataLinkToZoneAggregator LINK_TO_ZONE_AGGREGATOR;
 
     /**
      * Specify whether this engine is linked remotely or locally.
@@ -55,13 +55,13 @@ public class Engine extends Thread {
 
     private int turnCount = 0;
 
-    public Engine(ZoneProcessorDataLinkAggregator zpdla) {
-        ZONE_LINK_AGGREGATOR = zpdla;
+    public Engine(DataLinkToZoneAggregator aggregator) {
+        LINK_TO_ZONE_AGGREGATOR = aggregator;
         /*
          * A server instantiating an remote engine will do so on startup, before it has accepted any connections.
          * A frontend instantiating a local engine will do so by providing the paired backend local link.
          */
-        IS_REMOTE = ZONE_LINK_AGGREGATOR.countLinks() > 0;
+        IS_REMOTE = LINK_TO_ZONE_AGGREGATOR.countLinks() > 0;
     }
 
     public void run() {
@@ -73,7 +73,7 @@ public class Engine extends Thread {
     private void executionLoop() {
         for (;;) {
             if (++turnCount % (TURN_TIME_SECOND / turnTime) == 0) audit(); //audit the aggregator once per second
-            ZONE_LINK_AGGREGATOR.processAll();
+            LINK_TO_ZONE_AGGREGATOR.processAll();
             if (turnTime > 0) {
                 nextTurnStart += turnTime;
                 long timeUntilNextTurn = nextTurnStart - System.currentTimeMillis();
@@ -108,7 +108,7 @@ public class Engine extends Thread {
      * Then check each active zone processor to ensure it still has an active connection attached.
      */
     private void audit() {
-        ZONE_LINK_AGGREGATOR.placeZonelessLinks();
-        ZONE_LINK_AGGREGATOR.purgeUnconnectedZoneProcessors();
+        LINK_TO_ZONE_AGGREGATOR.placeZonelessLinks();
+        LINK_TO_ZONE_AGGREGATOR.purgeUnconnectedZoneProcessors();
     }
 }
