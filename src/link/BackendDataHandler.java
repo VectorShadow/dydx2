@@ -59,21 +59,22 @@ public class BackendDataHandler extends DataHandler {
                     Engine.getInstance().connectUserAccount(responseLink, loggedInAccount);
                 }
             }
-        } else if (instructionDatum instanceof LogOutRequestInstructionDatum) {
-            LogOutRequestInstructionDatum lorid = (LogOutRequestInstructionDatum)instructionDatum;
+        } else if (instructionDatum instanceof LogOutInstructionDatum) {
+            LogOutInstructionDatum lorid = (LogOutInstructionDatum)instructionDatum;
             Engine.getInstance().disconnectUserAccount(responseLink, lorid.USERNAME);
-            //no need to send a response here
+            responseLink.transmit(new LogOutInstructionDatum(""));
         } else if (instructionDatum instanceof AccountCreationRequestInstructionDatum) {
             AccountCreationRequestInstructionDatum acrid = (AccountCreationRequestInstructionDatum)instructionDatum;
             UserAccount createdAccount =
                     UserAccountManager.createUserAccount(acrid.USERNAME, acrid.SALT, acrid.HASHED_PASSWORD);
             responseLink.transmit(
                     new LogInResponseInstructionDatum(
-                            LOGIN_SUCCESS,
+                            createdAccount == null ? LOGIN_FAILURE_DUPLICATE_ACCOUNT_CREATION : LOGIN_SUCCESS,
                             createdAccount
                     )
             );
-            Engine.getInstance().connectUserAccount(responseLink, createdAccount);
+            if (createdAccount != null)
+                Engine.getInstance().connectUserAccount(responseLink, createdAccount);
         }
     }
 }

@@ -99,7 +99,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
             if (dls.zoneSession == null) {
                 DataLink dl = dls.LINK;
                 UserAccount ua = dls.userAccount;
-                //don't attempt to place a link that has not yet logged into an account or selected an avatar
+                //don't attempt to place a link that has not yet logged into an account or selected an avatar.
                 if (ua == null || ua.getCurrentAvatar() == null) continue;
                 ZoneCoordinate zc = ua.getCurrentAvatar().getAt();
                 ZoneSession zs = get(zc);
@@ -129,12 +129,15 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
                 StringBuilder logMessageBuilder = new StringBuilder("Purged expired link session ");
                 if (dls.userAccount != null) {
                     String username = dls.userAccount.getName();
-                    logMessageBuilder.append("from user " + username);
+                    logMessageBuilder.append("from user \"" + username + "\". ");
                     connectedUserNames.remove(username);
                 } else {
-                    logMessageBuilder.append("with no logged in user");
+                    logMessageBuilder.append("(no login). ");
                 }
-                LiveLog.log(logMessageBuilder.append(".").toString(), INFO);
+                LiveLog.log(
+                        logMessageBuilder.append( + connectedUserNames.size() + " users remain connected.").toString(),
+                        INFO
+                );
             }
         }
     }
@@ -152,6 +155,11 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
     void trackUserAccount(DataLink dataLink, UserAccount userAccount) {
         get(dataLink).userAccount = userAccount;
         connectedUserNames.add(userAccount.getName());
+        LiveLog.log(
+                "User \"" + userAccount.getName() + "\" logged in. " +
+                        connectedUserNames.size() + " users are now connected.",
+                INFO
+        );
     }
     /**
      * Stop tracking a connected user account (e.g. logout, disconnection).
@@ -162,7 +170,11 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         DataLinkSession dls = get(dataLink);
         dls.userAccount = null;
         connectedUserNames.remove(username);
+        LiveLog.log(
+                "User \"" + username + "\" logged out. " +
+                        connectedUserNames.size() + " users remain connected.",
+                INFO
+        );
         dls.LINK.forceExpiration();
-
     }
 }

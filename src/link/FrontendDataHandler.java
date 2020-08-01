@@ -2,9 +2,7 @@ package link;
 
 import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
-import link.instructions.GameZoneUpdateInstructionDatum;
-import link.instructions.InstructionDatum;
-import link.instructions.LogInResponseInstructionDatum;
+import link.instructions.*;
 
 import static link.instructions.LogInResponseInstructionDatum.*;
 
@@ -23,8 +21,11 @@ public class FrontendDataHandler extends DataHandler {
                 GameZone.frontEnd.apply(gzu);
             //todo - send back a checksum
         } else if (instructionDatum instanceof LogInResponseInstructionDatum) {
-            LogInResponseInstructionDatum lrid = (LogInResponseInstructionDatum)instructionDatum;
-            switch (lrid.RESPONSE_CODE) {
+            LogInResponseInstructionDatum lirid = (LogInResponseInstructionDatum)instructionDatum;
+            switch (lirid.RESPONSE_CODE) {
+                case LOGIN_FAILURE_DUPLICATE_ACCOUNT_CREATION:
+                    System.out.println("Duplicate account creation!");
+                    break;
                 case LOGIN_FAILURE_ACCOUNT_ALREADY_CONNECTED:
                     System.out.println("Account was already connected!");
                     //todo - proper user notification
@@ -43,9 +44,10 @@ public class FrontendDataHandler extends DataHandler {
                     //todo - use the transmitted user account for this
                     break;
                     default:
-                        throw new IllegalStateException("Unhandled response code: " + lrid.RESPONSE_CODE);
+                        throw new IllegalStateException("Unhandled response code: " + lirid.RESPONSE_CODE);
             }
-
+        } else if (instructionDatum instanceof LogOutInstructionDatum) {
+            responseLink.forceExpiration();
         } else {
                 //todo - more cases
                 throw new IllegalArgumentException("Unhandled InstructionDatum class: " + instructionDatum.getClass());

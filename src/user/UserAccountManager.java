@@ -46,8 +46,14 @@ public class UserAccountManager {
     }
 
     public static UserAccount createUserAccount(String username, String salt, String hashedPassword) {
+        /*
+         * Client programs should not make user account creation requests without first making a login
+         * attempt and receiving a login response carrying the LOGIN_FAILURE_ACCOUNT_DID_NOT_EXIST code.
+         * However, nothing absolutely prevents such a request - if it should occur, we simply refuse access
+         * by returning null instead of the requested UserAccount.
+         */
         if (queryUsername(username) != null)
-            throw new IllegalStateException("User account creation called on pre-existing username.");
+            return null;
         String catalogLine = username + FIELD_SEPARATOR + salt + FIELD_SEPARATOR + hashedPassword;
         try {
             Files.write(CATALOG_PATH, catalogLine.getBytes(), StandardOpenOption.APPEND);
