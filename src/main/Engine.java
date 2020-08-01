@@ -77,11 +77,14 @@ public class Engine extends Thread {
             if (turnTime > 0) {
                 nextTurnStart += turnTime;
                 long timeUntilNextTurn = nextTurnStart - System.currentTimeMillis();
-                validateTime(timeUntilNextTurn);
-                try {
-                    Thread.sleep(timeUntilNextTurn);
-                } catch (InterruptedException e) {
-                    LogHub.logFatalCrash("Engine thread interrupted.", e);
+                if (validateTime(timeUntilNextTurn)) {
+                    try {
+                        Thread.sleep(timeUntilNextTurn);
+                    } catch (InterruptedException e) {
+                        LogHub.logFatalCrash("Engine thread interrupted.", e);
+                    }
+                } else {
+                    nextTurnStart = System.currentTimeMillis(); //start the next turn immediately
                 }
             } else {
                 //todo - handle negative turn time constants appropriately
@@ -89,18 +92,26 @@ public class Engine extends Thread {
         }
     }
 
-    private void validateTime(long timeUntilNextTurn) {
-        if (timeUntilNextTurn < 0) { //throw a (fatal) exception if the turn execution exceeded its allotted time
-            //todo - handle this by dynamically adjusting turn times?
-            throw new IllegalStateException("Turn execution time exceeded allotted turn time: " +
-                    (turnTime - timeUntilNextTurn) + " > " + turnTime);
-        } else if (timeUntilNextTurn < turnTime / 4) { //log a warning if a turn takes the bulk of its allotted time
+    /**
+     * Return whether the elapsed turn time was less than or equal to the expected turn time.
+     */
+    private boolean validateTime(long timeUntilNextTurn) {
+        if (timeUntilNextTurn < 0) { //log a non-fatal error if the turn execution exceeded its allotted time
+            LiveLog.log(
+                    "Turn " + turnCount + " execution time exceeded allotted turn time: " +
+                            (turnTime - timeUntilNextTurn) + " > " + turnTime,
+                    ERROR
+            );
+            return false;
+        }
+        if (timeUntilNextTurn < turnTime / 4) { //log a warning if a turn takes the bulk of its allotted time
             LiveLog.log("Turn " + turnCount + " took more than 75% of allotted time.", WARNING);
         } else if (timeUntilNextTurn < turnTime / 2) { //log an alert if the turn takes at least half of its allotted time
             LiveLog.log("Turn " + turnCount + " took more than 50% of allotted time.", ALERT);
         } else if (turnCount % 32 == 0) { //occasionally log acceptable turn execution times as info
             LiveLog.log("Turn took " + (turnTime - timeUntilNextTurn) + "ms.", INFO);
         }
+        return true;
     }
 
     /**
@@ -108,7 +119,11 @@ public class Engine extends Thread {
      * Then check each active zone processor to ensure it still has an active connection attached.
      */
     private void audit() {
+        //remove any data link sessions which are no longer connected to a client
+        LINK_TO_ZONE_AGGREGATOR.purgeExpiredDataLinkSessions();
+        //connect new data link sessions which are ready for a zone to the appropriate zone
         LINK_TO_ZONE_AGGREGATOR.placeZonelessLinks();
-        LINK_TO_ZONE_AGGREGATOR.purgeUnconnectedZoneProcessors();
+        //remove any zone sessions which no longer have any data link sessions connected to them
+        LINK_TO_ZONE_AGGREGATOR.purgeUnconnectedZoneSessions();
     }
 }

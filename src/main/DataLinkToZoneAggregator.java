@@ -6,6 +6,7 @@ import gamestate.coordinates.ZoneCoordinate;
 import link.DataLink;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import static main.LiveLog.LogEntryPriority.*;
 
@@ -117,9 +118,22 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
     }
 
     /**
+     * Remove all DataLinkSessons which have expired DataLinks.
+     */
+    void purgeExpiredDataLinkSessions() {
+        for (Iterator<DataLinkSession> i = dataLinkSessions.iterator(); i.hasNext();) {
+            DataLinkSession dls = i.next();
+            if (dls.LINK.isExpired()) {
+                i.remove();
+                dls.zs.LINKS.remove(dls);
+            }
+        }
+    }
+
+    /**
      * Remove all ZoneProcessors which are no longer connected to a DataLink.
      */
-    void purgeUnconnectedZoneProcessors() {
+    void purgeUnconnectedZoneSessions() {
         zoneSessions.removeIf(zs -> zs.LINKS.size() == 0);
     }
 }
