@@ -15,7 +15,7 @@ import java.util.Comparator;
 /**
  * Track a ZoneProcessor and all DataLinks currently connected to it.
  */
-class ZoneSession {
+public class ZoneSession {
 
     /**
      * A sub-engine which processes all events for a particular zone.

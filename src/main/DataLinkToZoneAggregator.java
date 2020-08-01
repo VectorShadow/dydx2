@@ -4,6 +4,7 @@ import definitions.DefinitionsManager;
 import gamestate.gamezone.GameZone;
 import gamestate.coordinates.ZoneCoordinate;
 import link.DataLink;
+import user.UserAccount;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,7 +43,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
     public void addZoneProcessor(DataLink dl, GameZone gz, ZoneCoordinate zc) {
         ZoneSession zs = new ZoneSession(zc, gz);
         DataLinkSession dls = get(dl);
-        dls.zs = zs;
+        dls.zoneSession = zs;
         zs.LINKS.add(dls);
         zoneSessions.add(zs);
         LiveLog.log("Connected dataLink to new Zone at " + zc + ". ", INFO);
@@ -54,9 +55,9 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
      */
     private void connect(DataLink dl, ZoneCoordinate zc) {
         DataLinkSession dls = get(dl);
-        dls.zs.LINKS.remove(dls);
+        dls.zoneSession.LINKS.remove(dls);
         ZoneSession zs = get(zc);
-        dls.zs = zs;
+        dls.zoneSession = zs;
         zs.LINKS.add(dls);
         LiveLog.log(
                 "Connected dataLink to existing Zone at " + zc + ". Zone now has " + zs.LINKS.size() +
@@ -68,7 +69,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
     /**
      * @return the DataLinkSession corresponding to the specified DataLink.
      */
-    private DataLinkSession get(DataLink dl) {
+    DataLinkSession get(DataLink dl) {
         for (DataLinkSession dls : dataLinkSessions) {
             if (dls.LINK == dl) return dls;
         }
@@ -78,7 +79,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
     /**
      * @return the ZoneSession corresponding to the specified ZoneCoordinate.
      */
-    private ZoneSession get(ZoneCoordinate zc) {
+    ZoneSession get(ZoneCoordinate zc) {
         for (ZoneSession zs : zoneSessions) {
             if (zs.COORD.equals(zc)) return zs;
         }
@@ -90,26 +91,19 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
      */
     void placeZonelessLinks() {
         for (DataLinkSession dls : dataLinkSessions) {
-            if (dls.zs == null) {
+            if (dls.zoneSession == null) {
                 DataLink dl = dls.LINK;
-                //do not attempt to place this link in a zone until encryption has been established.
-                //todo - we can probably remove this check once we assign accounts to links, since encryption
-                // MUST be established before that happens.
-                if (!dl.isEncrypted()) continue;
-                //todo - links should connect to a player account, and eventually select a character.
-                // Once this is set, the character will contain ZoneCoordinates, and these should be used to place
-                // the character in either an existing zone or a new one. For now, make a new one:
-                ZoneCoordinate zc = new ZoneCoordinate(
-                        0,
-                        ZoneCoordinate.SURFACE_DEPTH,
-                        ZoneCoordinate.GLOBAL_INSTANCE
-                );
-                ZoneSession zn = get(zc);
-                if (zn == null) {
+                UserAccount ua = dls.userAccount;
+                //don't attempt to place a link that has not yet logged into an account or selected an avatar
+                if (ua == null || ua.getCurrentAvatar() == null) continue;
+                ZoneCoordinate zc = ua.getCurrentAvatar().getAt();
+                ZoneSession zs = get(zc);
+                if (zs == null) {
                     addZoneProcessor(dl, DefinitionsManager.generateZone(zc), zc);
                 } else {
                     connect(dl, zc);
                 }
+                LiveLog.log("Connected user " + ua.getName() + " to GameZone at " + zc, INFO);
             }
         }
     }
@@ -125,7 +119,16 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
             DataLinkSession dls = i.next();
             if (dls.LINK.isExpired()) {
                 i.remove();
-                dls.zs.LINKS.remove(dls);
+                dls.zoneSession.LINKS.remove(dls);
+                LiveLog.log(
+                        "Purged expired link session " +
+                                (dls.userAccount == null ?
+                                        "with no logged in user" :
+                                        ("from user " + dls.userAccount.getName())
+                                )
+                                + ".",
+                        INFO
+                        );
             }
         }
     }

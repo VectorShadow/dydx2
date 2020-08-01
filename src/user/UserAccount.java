@@ -3,6 +3,7 @@ package user;
 import main.LogHub;
 
 import java.io.*;
+import java.util.ArrayList;
 
 import static user.UserAccountManager.*;
 
@@ -11,11 +12,16 @@ import static user.UserAccountManager.*;
  */
 public class UserAccount implements Serializable {
 
-    final String NAME;
-    //todo - more fields, probably a list of characters
+    public static final int MAX_AVATAR_COUNT = 4; //arbitrary - this may change later
+
+    private final String NAME;
+    private final ArrayList<UserAvatar> AVATARS;
+    private UserAvatar currentAvatar = null;
+    //todo - more fields?
 
     UserAccount(String userName) {
         NAME = userName;
+        AVATARS = new ArrayList<>();
     }
 
     public static UserAccount load(String username) {
@@ -31,6 +37,7 @@ public class UserAccount implements Serializable {
     }
 
     public void save() {
+        currentAvatar = null; //clear the current avatar whenever we save the account
         try {
             FileOutputStream fos = new FileOutputStream(getAccountSaveFileName(NAME));
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -42,5 +49,17 @@ public class UserAccount implements Serializable {
 
     private static String getAccountSaveFileName(String username) throws IOException {
         return getUserDirectoryPath(username).toString() + "/" + ACCOUNT_FILE_NAME;
+    }
+
+    public UserAvatar getCurrentAvatar() {
+        return currentAvatar;
+    }
+
+    public String getName() {
+        return NAME;
+    }
+
+    public void setCurrentAvatar(UserAvatar currentAvatar) {
+        this.currentAvatar = currentAvatar;
     }
 }

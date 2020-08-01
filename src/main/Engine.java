@@ -1,5 +1,8 @@
 package main;
 
+import gamestate.coordinates.ZoneCoordinate;
+import link.DataLink;
+
 import static main.LiveLog.LogEntryPriority.*;
 
 /**
@@ -40,6 +43,8 @@ public class Engine extends Thread {
     private static long turnTime = TURN_TIME_DEFAULT;
     private static long nextTurnStart = -1;
 
+    private static Engine instance = null;
+
     /**
      * A list of active connections on data links.
      * In a remote configuration, this contains a number of links corresponding to all active client connections,
@@ -55,7 +60,17 @@ public class Engine extends Thread {
 
     private int turnCount = 0;
 
-    public Engine(DataLinkToZoneAggregator aggregator) {
+    public static void startEngine(DataLinkToZoneAggregator aggregator) {
+        instance = new Engine(aggregator);
+        instance.start();
+    }
+
+    public static Engine getInstance() {
+        if (instance == null) throw new IllegalStateException("Must call startEngine before requesting instance.");
+        return instance;
+    }
+
+    private Engine(DataLinkToZoneAggregator aggregator) {
         LINK_TO_ZONE_AGGREGATOR = aggregator;
         /*
          * A server instantiating an remote engine will do so on startup, before it has accepted any connections.
@@ -125,5 +140,15 @@ public class Engine extends Thread {
         LINK_TO_ZONE_AGGREGATOR.placeZonelessLinks();
         //remove any zone sessions which no longer have any data link sessions connected to them
         LINK_TO_ZONE_AGGREGATOR.purgeUnconnectedZoneSessions();
+    }
+
+    /**
+     * Provide external access to sessions for our handlers.
+     */
+    public DataLinkSession getDataLinkSession(DataLink dataLink) {
+        return LINK_TO_ZONE_AGGREGATOR.get(dataLink);
+    }
+    public ZoneSession getZoneSession(ZoneCoordinate zoneCoordinate) {
+        return LINK_TO_ZONE_AGGREGATOR.get(zoneCoordinate);
     }
 }

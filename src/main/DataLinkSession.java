@@ -1,17 +1,28 @@
 package main;
 
 import link.DataLink;
+import user.UserAccount;
 
 /**
  * Track a DataLink and the Zone it is connected to.
  */
-class DataLinkSession {
+public class DataLinkSession {
 
     final DataLink LINK;
-    ZoneSession zs;
+    UserAccount userAccount;
+    ZoneSession zoneSession;
 
     DataLinkSession(DataLink dataLink) {
         LINK = dataLink;
-        zs = null;
+        userAccount = null;
+        zoneSession = null;
+    }
+
+    public UserAccount getUserAccount() {
+        return userAccount;
+    }
+
+    public void setUserAccount(UserAccount userAccount) {
+        this.userAccount = userAccount;
     }
 }

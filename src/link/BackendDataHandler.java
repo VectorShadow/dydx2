@@ -4,6 +4,7 @@ import link.instructions.AccountCreationRequestInstructionDatum;
 import link.instructions.InstructionDatum;
 import link.instructions.LoginRequestInstructionDatum;
 import link.instructions.LoginResponseInstructionDatum;
+import main.Engine;
 import user.UserAccount;
 import user.UserAccountManager;
 
@@ -38,21 +39,26 @@ public class BackendDataHandler extends DataHandler {
                         )
                 );
             } else {
+                UserAccount loggedInAccount = UserAccount.load(catalogFields[USERNAME]);
                 responseLink.transmit(
                         new LoginResponseInstructionDatum(
                                 LOGIN_SUCCESS,
-                                UserAccount.load(catalogFields[USERNAME])
+                                loggedInAccount
                         )
                 );
+                Engine.getInstance().getDataLinkSession(responseLink).setUserAccount(loggedInAccount);
             }
         } else if (instructionDatum instanceof AccountCreationRequestInstructionDatum) {
             AccountCreationRequestInstructionDatum acrid = (AccountCreationRequestInstructionDatum)instructionDatum;
+            UserAccount createdAccount =
+                    UserAccountManager.createUserAccount(acrid.USERNAME, acrid.SALT, acrid.HASHED_PASSWORD);
             responseLink.transmit(
                     new LoginResponseInstructionDatum(
                             LOGIN_SUCCESS,
-                            UserAccountManager.createUserAccount(acrid.USERNAME, acrid.SALT, acrid.HASHED_PASSWORD)
+                            createdAccount
                     )
             );
+            Engine.getInstance().getDataLinkSession(responseLink).setUserAccount(createdAccount);
         }
     }
 }

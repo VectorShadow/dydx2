@@ -6,6 +6,11 @@ package gamestate.coordinates;
 public class ZoneCoordinate implements Comparable<ZoneCoordinate> {
 
     /**
+     * The unique location id of the origin zone.
+     */
+    public static final int ORIGIN_ZONE_ID = 0;
+
+    /**
      * The depth of a surface level Zone. Most towns and fields should have this depth.
      */
     public static final int SURFACE_DEPTH = 0;
@@ -14,6 +19,11 @@ public class ZoneCoordinate implements Comparable<ZoneCoordinate> {
      * The global instance of a Zone.
      */
     public static final int GLOBAL_INSTANCE = -1;
+
+    /**
+     * The full coordinate of the origin zone.
+     */
+    public static final ZoneCoordinate ORIGIN_ZONE = new ZoneCoordinate(ORIGIN_ZONE_ID, SURFACE_DEPTH, GLOBAL_INSTANCE);
 
     /**
      * The unique world location identifier.
