@@ -18,7 +18,19 @@ public class BackendDataHandler extends DataHandler {
 
     @Override
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
-        if (instructionDatum instanceof LogInRequestInstructionDatum) {
+        if (instructionDatum instanceof AccountCreationRequestInstructionDatum) {
+            AccountCreationRequestInstructionDatum acrid = (AccountCreationRequestInstructionDatum)instructionDatum;
+            UserAccount createdAccount =
+                    UserAccountManager.createUserAccount(acrid.USERNAME, acrid.SALT, acrid.HASHED_PASSWORD);
+            responseLink.transmit(
+                    new LogInResponseInstructionDatum(
+                            createdAccount == null ? LOGIN_FAILURE_DUPLICATE_ACCOUNT_CREATION : LOGIN_SUCCESS,
+                            createdAccount
+                    )
+            );
+            if (createdAccount != null)
+                Engine.getInstance().connectUserAccount(responseLink, createdAccount);
+        } else if (instructionDatum instanceof LogInRequestInstructionDatum) {
             LogInRequestInstructionDatum lirid = (LogInRequestInstructionDatum)instructionDatum;
             String[] catalogFields = UserAccountManager.queryUsername(lirid.USERNAME);
             if (catalogFields == null) {
@@ -63,18 +75,8 @@ public class BackendDataHandler extends DataHandler {
             LogOutInstructionDatum lorid = (LogOutInstructionDatum)instructionDatum;
             Engine.getInstance().disconnectUserAccount(responseLink, lorid.USERNAME);
             responseLink.transmit(new LogOutInstructionDatum(""));
-        } else if (instructionDatum instanceof AccountCreationRequestInstructionDatum) {
-            AccountCreationRequestInstructionDatum acrid = (AccountCreationRequestInstructionDatum)instructionDatum;
-            UserAccount createdAccount =
-                    UserAccountManager.createUserAccount(acrid.USERNAME, acrid.SALT, acrid.HASHED_PASSWORD);
-            responseLink.transmit(
-                    new LogInResponseInstructionDatum(
-                            createdAccount == null ? LOGIN_FAILURE_DUPLICATE_ACCOUNT_CREATION : LOGIN_SUCCESS,
-                            createdAccount
-                    )
-            );
-            if (createdAccount != null)
-                Engine.getInstance().connectUserAccount(responseLink, createdAccount);
+        } else if (instructionDatum instanceof ReportChecksumMismatchInstructionDatum) {
+            responseLink.transmit(new GameZoneInstructionDatum(Engine.getInstance().getGameZone(responseLink)));
         }
     }
 }

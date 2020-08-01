@@ -16,10 +16,14 @@ public class FrontendDataHandler extends DataHandler {
 
     @Override
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
-        if (instructionDatum instanceof GameZoneUpdateInstructionDatum) {
-            for (GameZoneUpdate gzu : ((GameZoneUpdateInstructionDatum) instructionDatum).UPDATE_LIST)
+        if (instructionDatum instanceof GameZoneInstructionDatum) {
+            GameZone.frontEnd = ((GameZoneInstructionDatum)instructionDatum).GAME_ZONE;
+        } else if (instructionDatum instanceof GameZoneUpdateInstructionDatum) {
+            GameZoneUpdateInstructionDatum gzuid = ((GameZoneUpdateInstructionDatum) instructionDatum);
+            for (GameZoneUpdate gzu : gzuid.UPDATE_LIST)
                 GameZone.frontEnd.apply(gzu);
-            //todo - send back a checksum
+            if (GameZone.frontEnd.getCheckSum() != gzuid.UPDATE_CHECKSUM)
+                responseLink.transmit(new ReportChecksumMismatchInstructionDatum());
         } else if (instructionDatum instanceof LogInResponseInstructionDatum) {
             LogInResponseInstructionDatum lirid = (LogInResponseInstructionDatum)instructionDatum;
             switch (lirid.RESPONSE_CODE) {

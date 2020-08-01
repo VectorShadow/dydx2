@@ -65,6 +65,8 @@ public class GameZone {
      */
     final Map PROJECTILE_MAP;
 
+    private int checkSum = 0;
+
     GameZone(int height, int width) {
         ROWS = height;
         COLUMNS = width;
@@ -81,6 +83,10 @@ public class GameZone {
 
     private GameProjectile lookupProjectile(int serialID) {
         return (GameProjectile) PROJECTILE_MAP.get(serialID);
+    }
+
+    public int getCheckSum() {
+        return checkSum;
     }
 
     public ArrayList<GameActor> getActorList() {
@@ -182,6 +188,7 @@ public class GameZone {
     public void apply(GameZoneUpdate update) {
         try {
             update.METHOD.invoke(this, update.ARGUMENTS);
+            ++checkSum;
         } catch (IllegalAccessException e) {
             LogHub.logFatalCrash("Update failure - IllegalAccessException", e);
         } catch (InvocationTargetException e) {

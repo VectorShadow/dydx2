@@ -4,6 +4,7 @@ import definitions.DefinitionsManager;
 import gamestate.gamezone.GameZone;
 import gamestate.coordinates.ZoneCoordinate;
 import link.DataLink;
+import link.instructions.GameZoneInstructionDatum;
 import user.UserAccount;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         dls.zoneSession = zs;
         zs.LINKS.add(dls);
         zoneSessions.add(zs);
+        dl.transmit(new GameZoneInstructionDatum(dls.zoneSession.getGameZone()));
         LiveLog.log("Connected dataLink to new Zone at " + zc + ". ", INFO);
     }
 
@@ -60,6 +62,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         ZoneSession zs = get(zc);
         dls.zoneSession = zs;
         zs.LINKS.add(dls);
+        dl.transmit(new GameZoneInstructionDatum(dls.zoneSession.getGameZone()));
         LiveLog.log(
                 "Connected dataLink to existing Zone at " + zc + ". Zone now has " + zs.LINKS.size() +
                 " connected DataLinks.",

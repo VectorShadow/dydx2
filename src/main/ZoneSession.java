@@ -54,7 +54,7 @@ public class ZoneSession {
             }
             //transmit all updates on all data links connected to this zone processor
             for (DataLinkSession dln : linkNodes)
-                dln.LINK.transmit(new GameZoneUpdateInstructionDatum(turnUpdates));
+                dln.LINK.transmit(new GameZoneUpdateInstructionDatum(GAME_ZONE.getCheckSum(), turnUpdates));
         }
     }
     final ZoneCoordinate COORD;
@@ -69,5 +69,9 @@ public class ZoneSession {
 
     void processTurn() {
         PROCESSOR.processTurn(LINKS);
+    }
+
+    GameZone getGameZone() {
+        return PROCESSOR.GAME_ZONE;
     }
 }

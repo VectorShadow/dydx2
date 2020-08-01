@@ -1,5 +1,6 @@
 package main;
 
+import gamestate.gamezone.GameZone;
 import link.DataLink;
 import user.UserAccount;
 
@@ -154,5 +155,9 @@ public class Engine extends Thread {
 
     public boolean isConnected(UserAccount userAccount) {
         return LINK_TO_ZONE_AGGREGATOR.isTrackingUser(userAccount);
+    }
+
+    public GameZone getGameZone(DataLink dataLink) {
+        return LINK_TO_ZONE_AGGREGATOR.get(dataLink).zoneSession.getGameZone();
     }
 }
