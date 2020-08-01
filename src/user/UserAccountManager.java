@@ -60,6 +60,10 @@ public class UserAccountManager {
         return userAccount;
     }
 
+    public static Path getDirectoryPath() {
+        return Paths.get(USER_DIRECTORY);
+    }
+
     static Path getUserDirectoryPath(String username) throws IOException {
         Path userDirectoryPath = Paths.get(USER_DIRECTORY + "/" + username);
         if (!Files.exists(userDirectoryPath))

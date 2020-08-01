@@ -95,9 +95,9 @@ public class Engine extends Thread {
             throw new IllegalStateException("Turn execution time exceeded allotted turn time: " +
                     (turnTime - timeUntilNextTurn) + " > " + turnTime);
         } else if (timeUntilNextTurn < turnTime / 4) { //log a warning if a turn takes the bulk of its allotted time
-            LiveLog.log("Turn took more than 75% of allotted time.", WARNING);
+            LiveLog.log("Turn " + turnCount + " took more than 75% of allotted time.", WARNING);
         } else if (timeUntilNextTurn < turnTime / 2) { //log an alert if the turn takes at least half of its allotted time
-            LiveLog.log("Turn took more than 50% of allotted time.", ALERT);
+            LiveLog.log("Turn " + turnCount + " took more than 50% of allotted time.", ALERT);
         } else if (turnCount % 32 == 0) { //occasionally log acceptable turn execution times as info
             LiveLog.log("Turn took " + (turnTime - timeUntilNextTurn) + "ms.", INFO);
         }
