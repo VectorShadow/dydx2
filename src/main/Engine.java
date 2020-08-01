@@ -1,7 +1,7 @@
 package main;
 
-import gamestate.coordinates.ZoneCoordinate;
 import link.DataLink;
+import user.UserAccount;
 
 import static main.LiveLog.LogEntryPriority.*;
 
@@ -87,7 +87,8 @@ public class Engine extends Thread {
 
     private void executionLoop() {
         for (;;) {
-            if (++turnCount % (TURN_TIME_SECOND / turnTime) == 0) audit(); //audit the aggregator once per second
+            //todo - update audit conditions to make sense in remote, local realtime, and local turnbased evironments.
+            if (++turnCount % (4 * TURN_TIME_SECOND / turnTime) == 0) audit(); //audit the aggregator every 4 seconds
             LINK_TO_ZONE_AGGREGATOR.processAll();
             if (turnTime > 0) {
                 nextTurnStart += turnTime;
@@ -133,6 +134,7 @@ public class Engine extends Thread {
      * Check each active connection to ensure the zone it is connected to has a running ZoneProcessor.
      * Then check each active zone processor to ensure it still has an active connection attached.
      */
+    //todo - update audit conditions to make sense in remote, local realtime, and local turnbased evironments.
     private void audit() {
         //remove any data link sessions which are no longer connected to a client
         LINK_TO_ZONE_AGGREGATOR.purgeExpiredDataLinkSessions();
@@ -142,13 +144,15 @@ public class Engine extends Thread {
         LINK_TO_ZONE_AGGREGATOR.purgeUnconnectedZoneSessions();
     }
 
-    /**
-     * Provide external access to sessions for our handlers.
-     */
-    public DataLinkSession getDataLinkSession(DataLink dataLink) {
-        return LINK_TO_ZONE_AGGREGATOR.get(dataLink);
+    public void connectUserAccount(DataLink dataLink, UserAccount userAccount) {
+        LINK_TO_ZONE_AGGREGATOR.trackUserAccount(dataLink, userAccount);
     }
-    public ZoneSession getZoneSession(ZoneCoordinate zoneCoordinate) {
-        return LINK_TO_ZONE_AGGREGATOR.get(zoneCoordinate);
+
+    public void disconnectUserAccount(DataLink dataLink, String userAccountName) {
+        LINK_TO_ZONE_AGGREGATOR.unTrackUserAccount(dataLink, userAccountName);
+    }
+
+    public boolean isConnected(UserAccount userAccount) {
+        return LINK_TO_ZONE_AGGREGATOR.isTrackingUser(userAccount);
     }
 }

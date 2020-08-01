@@ -16,6 +16,7 @@ import static main.LiveLog.LogEntryPriority.*;
  */
 public class DataLinkToZoneAggregator implements DataLinkAggregator{
 
+    private ArrayList<String> connectedUserNames = new ArrayList<>();
     private ArrayList<DataLinkSession> dataLinkSessions = new ArrayList<>();
     private ArrayList<ZoneSession> zoneSessions = new ArrayList<>();
 
@@ -86,6 +87,10 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         return null;
     }
 
+    boolean isTrackingUser(UserAccount userAccount) {
+        return connectedUserNames.contains(userAccount.getName());
+    }
+
     /**
      * Attempt to load a Zone for each DataLink that isn't yet connected to one.
      */
@@ -119,16 +124,17 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
             DataLinkSession dls = i.next();
             if (dls.LINK.isExpired()) {
                 i.remove();
-                dls.zoneSession.LINKS.remove(dls);
-                LiveLog.log(
-                        "Purged expired link session " +
-                                (dls.userAccount == null ?
-                                        "with no logged in user" :
-                                        ("from user " + dls.userAccount.getName())
-                                )
-                                + ".",
-                        INFO
-                        );
+                if (dls.zoneSession != null)
+                    dls.zoneSession.LINKS.remove(dls);
+                StringBuilder logMessageBuilder = new StringBuilder("Purged expired link session ");
+                if (dls.userAccount != null) {
+                    String username = dls.userAccount.getName();
+                    logMessageBuilder.append("from user " + username);
+                    connectedUserNames.remove(username);
+                } else {
+                    logMessageBuilder.append("with no logged in user");
+                }
+                LiveLog.log(logMessageBuilder.append(".").toString(), INFO);
             }
         }
     }
@@ -138,5 +144,25 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
      */
     void purgeUnconnectedZoneSessions() {
         zoneSessions.removeIf(zs -> zs.LINKS.size() == 0);
+    }
+
+    /**
+     * Start tracking a connected user account (e.g. login)
+     */
+    void trackUserAccount(DataLink dataLink, UserAccount userAccount) {
+        get(dataLink).userAccount = userAccount;
+        connectedUserNames.add(userAccount.getName());
+    }
+    /**
+     * Stop tracking a connected user account (e.g. logout, disconnection).
+     * This method is provided for engine access, in order to remove a user voluntarily from a (formerly) un-expired
+     * Data Link. It will then expire the link so it can be purged during the next audit cycle.
+     */
+    void unTrackUserAccount(DataLink dataLink, String username) {
+        DataLinkSession dls = get(dataLink);
+        dls.userAccount = null;
+        connectedUserNames.remove(username);
+        dls.LINK.forceExpiration();
+
     }
 }

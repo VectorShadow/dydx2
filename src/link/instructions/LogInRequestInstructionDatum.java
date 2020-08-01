@@ -2,12 +2,12 @@ package link.instructions;
 
 import crypto.Password;
 
-public class LoginRequestInstructionDatum extends InstructionDatum {
+public class LogInRequestInstructionDatum extends InstructionDatum {
 
     public final String USERNAME;
     private final String PASSWORD;
 
-    public LoginRequestInstructionDatum(String username, String password) {
+    public LogInRequestInstructionDatum(String username, String password) {
         USERNAME = username;
         PASSWORD = password;
     }

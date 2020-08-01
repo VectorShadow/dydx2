@@ -4,9 +4,9 @@ import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
 import link.instructions.GameZoneUpdateInstructionDatum;
 import link.instructions.InstructionDatum;
-import link.instructions.LoginResponseInstructionDatum;
+import link.instructions.LogInResponseInstructionDatum;
 
-import static link.instructions.LoginResponseInstructionDatum.*;
+import static link.instructions.LogInResponseInstructionDatum.*;
 
 import java.net.Socket;
 
@@ -22,9 +22,13 @@ public class FrontendDataHandler extends DataHandler {
             for (GameZoneUpdate gzu : ((GameZoneUpdateInstructionDatum) instructionDatum).UPDATE_LIST)
                 GameZone.frontEnd.apply(gzu);
             //todo - send back a checksum
-        } else if (instructionDatum instanceof LoginResponseInstructionDatum) {
-            LoginResponseInstructionDatum lrid = (LoginResponseInstructionDatum)instructionDatum;
+        } else if (instructionDatum instanceof LogInResponseInstructionDatum) {
+            LogInResponseInstructionDatum lrid = (LogInResponseInstructionDatum)instructionDatum;
             switch (lrid.RESPONSE_CODE) {
+                case LOGIN_FAILURE_ACCOUNT_ALREADY_CONNECTED:
+                    System.out.println("Account was already connected!");
+                    //todo - proper user notification
+                    break;
                 case LOGIN_FAILURE_ACCOUNT_DID_NOT_EXIST:
                     System.out.println("Account did not exist!");
                     //todo - proper user notification
