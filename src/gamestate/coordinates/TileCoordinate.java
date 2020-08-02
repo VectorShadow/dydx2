@@ -11,4 +11,14 @@ public class TileCoordinate {
         COLUMN = column;
         ROW = row;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof TileCoordinate && COLUMN == ((TileCoordinate)o).COLUMN && ROW == ((TileCoordinate)o).ROW;
+    }
+
+    @Override
+    public String toString() {
+        return "[c(x):" + COLUMN + ",r(y):" + ROW + "]";
+    }
 }

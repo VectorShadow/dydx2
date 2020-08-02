@@ -24,6 +24,11 @@ public abstract class GameActor extends SerialGameObject {
     public abstract int getMovementAccess();
 
     /**
+     * @return the movement speed of this actor. The actor is responsible for calculating a value for this.
+     */
+    public abstract int getMovementSpeed();
+
+    /**
      * The engine will call this method for each actor at the start of every game turn.
      * The implementation must decide how to determine what events should be scheduled here.
      */

@@ -13,6 +13,23 @@ public class PointCoordinate extends TileCoordinate {
 
     private final TileCoordinate PARENT_TILE_COORDINATE;
 
+    /**
+     * Construct a point coordinate from absolute zone coordinates.
+     */
+    public PointCoordinate(int col, int row) {
+        this(
+                new TileCoordinate(
+                        col / POINTS_PER_TILE,
+                        row / POINTS_PER_TILE
+                ),
+                col % POINTS_PER_TILE,
+                row % POINTS_PER_TILE
+        );
+    }
+
+    /**
+     * Construct a point coordinate from a tile coordinate and relative point coordinates.
+     */
     public PointCoordinate(TileCoordinate tc, int pointCol, int pointRow) {
         super(
                 tc.COLUMN * POINTS_PER_TILE + pointCol,
@@ -23,5 +40,9 @@ public class PointCoordinate extends TileCoordinate {
 
     public TileCoordinate getParentTileCoordinate() {
         return PARENT_TILE_COORDINATE;
+    }
+
+    public static PointCoordinate centerOf(TileCoordinate tileCoordinate) {
+        return new PointCoordinate(tileCoordinate, POINTS_PER_TILE / 2, POINTS_PER_TILE / 2);
     }
 }
