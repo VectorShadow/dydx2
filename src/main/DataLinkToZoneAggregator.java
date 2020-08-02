@@ -8,7 +8,6 @@ import link.instructions.GameZoneInstructionDatum;
 import user.UserAccount;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import static main.LiveLog.LogEntryPriority.*;
 
@@ -62,6 +61,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         ZoneSession zs = get(zc);
         dls.zoneSession = zs;
         zs.LINKS.add(dls);
+        zs.expired = false; //un-flag this zone as expired if it receives a connection
         dl.transmit(new GameZoneInstructionDatum(dls.zoneSession.getGameZone()));
         LiveLog.log(
                 "Connected dataLink to existing Zone at " + zc + ". Zone now has " + zs.LINKS.size() +
@@ -95,61 +95,85 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
     }
 
     /**
-     * Attempt to load a Zone for each DataLink that isn't yet connected to one.
+     * Connect a DataLinkSession to a ZoneSession once a user has selected an avatar.
      */
-    void placeZonelessLinks() {
-        for (DataLinkSession dls : dataLinkSessions) {
-            if (dls.zoneSession == null) {
-                DataLink dl = dls.LINK;
-                UserAccount ua = dls.userAccount;
-                //don't attempt to place a link that has not yet logged into an account or selected an avatar.
-                if (ua == null || ua.getCurrentAvatar() == null) continue;
-                ZoneCoordinate zc = ua.getCurrentAvatar().getAt();
-                ZoneSession zs = get(zc);
-                if (zs == null) {
-                    addZoneProcessor(dl, DefinitionsManager.generateZone(zc), zc);
-                } else {
-                    connect(dl, zc);
-                }
-                LiveLog.log("Connected user " + ua.getName() + " to GameZone at " + zc, INFO);
-            }
+    void connectLinkToZone(DataLink dataLink) {
+        DataLinkSession dls = get(dataLink);
+        UserAccount ua = dls.userAccount;
+        ZoneCoordinate zc = ua.getCurrentAvatar().getAt();
+        ZoneSession zs = get(zc);
+        if (zs == null) {
+            addZoneProcessor(dataLink, DefinitionsManager.generateZone(zc), zc);
+        } else {
+            connect(dataLink, zc);
         }
+        LiveLog.log("Connected user " + ua.getName() + " to GameZone at " + zc, INFO);
     }
+
+    /**
+     * Disconnect a DataLinkSession to a ZoneSession when a user releases their avatar.
+     */
+    void disconnectLinkFromZone(DataLink dataLink) {
+        DataLinkSession dls = get(dataLink);
+        dls.zoneSession.LINKS.remove(dls);
+        dls.zoneSession = null;
+    }
+
     void processAll() {
-        for (ZoneSession zs : zoneSessions) zs.processTurn();
-    }
-
-    /**
-     * Remove all DataLinkSessons which have expired DataLinks.
-     */
-    void purgeExpiredDataLinkSessions() {
-        for (Iterator<DataLinkSession> i = dataLinkSessions.iterator(); i.hasNext();) {
-            DataLinkSession dls = i.next();
-            if (dls.LINK.isExpired()) {
-                i.remove();
-                if (dls.zoneSession != null)
-                    dls.zoneSession.LINKS.remove(dls);
-                StringBuilder logMessageBuilder = new StringBuilder("Purged expired link session ");
-                if (dls.userAccount != null) {
-                    String username = dls.userAccount.getName();
-                    logMessageBuilder.append("from user \"" + username + "\". ");
-                    connectedUserNames.remove(username);
-                } else {
-                    logMessageBuilder.append("(no login). ");
-                }
-                LiveLog.log(
-                        logMessageBuilder.append( + connectedUserNames.size() + " users remain connected.").toString(),
-                        INFO
-                );
+        for (ZoneSession zs : zoneSessions) {
+            zs.processTurn();
+            if (zs.LINKS.isEmpty()) {
+                zs.expired = true; //flag this zone as expired for the engine audit
             }
         }
     }
 
     /**
-     * Remove all ZoneProcessors which are no longer connected to a DataLink.
+     * Remove a DataLink whose connection has been lost.
+     */
+    void purgeExpiredDataLinkSession(DataLink dataLink) {
+        DataLinkSession dls = get(dataLink);
+        dataLinkSessions.remove(dls);
+        if (dls.zoneSession != null) {
+            dls.zoneSession.LINKS.remove(dls);
+            dls.zoneSession = null;
+        }
+        StringBuilder logMessageBuilder = new StringBuilder("Purged expired link session ");
+        if (dls.userAccount != null) {
+            String username = dls.userAccount.getName();
+            connectedUserNames.remove(username);
+            logMessageBuilder.append("from user \"" + username + "\". ");
+            dls.userAccount.save(); //save the user account
+            dls.userAccount = null;
+        } else {
+            logMessageBuilder.append("(no login). ");
+        }
+        LiveLog.log(
+                logMessageBuilder.append( + connectedUserNames.size() + " users remain connected.").toString(),
+                INFO
+        );
+    }
+
+    /**
+     * Remove all ZoneProcessors which have been unconnected to a dataLink long enough to expire.
      */
     void purgeUnconnectedZoneSessions() {
-        zoneSessions.removeIf(zs -> zs.LINKS.size() == 0);
+        zoneSessions.removeIf(zs -> zs.expired);
+    }
+
+    /**
+     * Verify that the aggregator conforms to its invariant.
+     */
+    void testInvariant() {
+        int linkConnectionCount = 0;
+        int zoneConnectionCount = 0;
+        for (DataLinkSession dls : dataLinkSessions)
+            linkConnectionCount += (dls.zoneSession == null) ? 0 : 1;
+        for (ZoneSession zs : zoneSessions)
+            zoneConnectionCount += zs.LINKS.size();
+        if (linkConnectionCount != zoneConnectionCount)
+            throw new IllegalStateException("Invariant failure - link connections: " + linkConnectionCount +
+                    " zone connections: " + zoneConnectionCount);
     }
 
     /**
@@ -163,21 +187,5 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
                         connectedUserNames.size() + " users are now connected.",
                 INFO
         );
-    }
-    /**
-     * Stop tracking a connected user account (e.g. logout, disconnection).
-     * This method is provided for engine access, in order to remove a user voluntarily from a (formerly) un-expired
-     * Data Link. It will then expire the link so it can be purged during the next audit cycle.
-     */
-    void unTrackUserAccount(DataLink dataLink, String username) {
-        DataLinkSession dls = get(dataLink);
-        dls.userAccount = null;
-        connectedUserNames.remove(username);
-        LiveLog.log(
-                "User \"" + username + "\" logged out. " +
-                        connectedUserNames.size() + " users remain connected.",
-                INFO
-        );
-        dls.LINK.forceExpiration();
     }
 }

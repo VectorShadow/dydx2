@@ -57,6 +57,7 @@ public class ZoneSession {
                 dln.LINK.transmit(new GameZoneUpdateInstructionDatum(GAME_ZONE.getCheckSum(), turnUpdates));
         }
     }
+    boolean expired = false; //flag for the engine to purge this zone on audit if it remains unconnected
     final ZoneCoordinate COORD;
     final ArrayList<DataLinkSession> LINKS;
     private final ZoneProcessor PROCESSOR;

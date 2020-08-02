@@ -88,8 +88,7 @@ public class Engine extends Thread {
 
     private void executionLoop() {
         for (;;) {
-            //todo - update audit conditions to make sense in remote, local realtime, and local turnbased evironments.
-            if (++turnCount % (4 * TURN_TIME_SECOND / turnTime) == 0) audit(); //audit the aggregator every 4 seconds
+            if (++turnCount % 255 == 0) audit(); //audit the aggregator every 255 turns
             LINK_TO_ZONE_AGGREGATOR.processAll();
             if (turnTime > 0) {
                 nextTurnStart += turnTime;
@@ -132,31 +131,55 @@ public class Engine extends Thread {
     }
 
     /**
-     * Check each active connection to ensure the zone it is connected to has a running ZoneProcessor.
-     * Then check each active zone processor to ensure it still has an active connection attached.
+     * Perform an audit of the aggregator.
      */
-    //todo - update audit conditions to make sense in remote, local realtime, and local turnbased evironments.
     private void audit() {
-        //remove any data link sessions which are no longer connected to a client
-        LINK_TO_ZONE_AGGREGATOR.purgeExpiredDataLinkSessions();
-        //connect new data link sessions which are ready for a zone to the appropriate zone
-        LINK_TO_ZONE_AGGREGATOR.placeZonelessLinks();
         //remove any zone sessions which no longer have any data link sessions connected to them
         LINK_TO_ZONE_AGGREGATOR.purgeUnconnectedZoneSessions();
+        //todo - once we're satisfied that the invariant holds, we can remove this
+        LINK_TO_ZONE_AGGREGATOR.testInvariant();
+        LiveLog.log("Audit passed", INFO);
+        //todo - other audit functions?
     }
 
+    /**
+     * On login: associate a data link with a user account and track the user account.
+     */
     public void connectUserAccount(DataLink dataLink, UserAccount userAccount) {
         LINK_TO_ZONE_AGGREGATOR.trackUserAccount(dataLink, userAccount);
     }
 
-    public void disconnectUserAccount(DataLink dataLink, String userAccountName) {
-        LINK_TO_ZONE_AGGREGATOR.unTrackUserAccount(dataLink, userAccountName);
+    /**
+     * On avatar selection: associate a data link with a zone session corresponding to the avatar's world location.
+     */
+    public void connectUserAvatar(DataLink dataLink) {
+        LINK_TO_ZONE_AGGREGATOR.connectLinkToZone(dataLink);
     }
 
+    /**
+     * On logout or disconnect: stop tracking the user account and purge the link.
+     */
+    public void disconnectDataLink(DataLink dataLink) {
+        LINK_TO_ZONE_AGGREGATOR.purgeExpiredDataLinkSession(dataLink);
+    }
+
+    /**
+     * On avatar release: disassociate a data link with its zone session.
+     */
+    public void disconnectUserAvatar(DataLink dataLink) {
+        LINK_TO_ZONE_AGGREGATOR.connectLinkToZone(dataLink);
+    }
+
+    /**
+     * Check whether the aggregator is tracking a particular user account, by name.
+     */
     public boolean isConnected(UserAccount userAccount) {
         return LINK_TO_ZONE_AGGREGATOR.isTrackingUser(userAccount);
     }
 
+    /**
+     * Access the game zone corresponding to the specified data link.
+     */
     public GameZone getGameZone(DataLink dataLink) {
         return LINK_TO_ZONE_AGGREGATOR.get(dataLink).zoneSession.getGameZone();
     }

@@ -2,18 +2,22 @@ package link;
 
 import link.instructions.*;
 import main.Engine;
+import main.LiveLog;
+import main.LogHub;
 import user.UserAccount;
 import user.UserAccountManager;
-
-import java.net.Socket;
 
 import static link.instructions.LogInResponseInstructionDatum.*;
 import static user.UserAccountManager.*;
 
 public class BackendDataHandler extends DataHandler {
     @Override
-    protected void connectionLost(Socket socket) {
-        //todo
+    protected void connectionLost(DataLink dataLink) {
+        dataLink.terminate(); //stop thread execution
+        if (dataLink instanceof LocalDataLink)
+            LogHub.logFatalCrash("Local connection lost", new IllegalStateException());
+        LiveLog.log("Lost connection to client.", LiveLog.LogEntryPriority.WARNING);
+        Engine.getInstance().disconnectDataLink(dataLink); //instruct the engine to properly remove the link
     }
 
     @Override
@@ -72,9 +76,10 @@ public class BackendDataHandler extends DataHandler {
                 }
             }
         } else if (instructionDatum instanceof LogOutInstructionDatum) {
+            responseLink.terminate(); //stop thread execution
             LogOutInstructionDatum lorid = (LogOutInstructionDatum)instructionDatum;
-            Engine.getInstance().disconnectUserAccount(responseLink, lorid.USERNAME);
-            responseLink.transmit(new LogOutInstructionDatum(""));
+            LiveLog.log("User \"" + lorid.USERNAME + "\" requested logout.", LiveLog.LogEntryPriority.INFO);
+            Engine.getInstance().disconnectDataLink(responseLink); //instruct the engine to properly remove the link
         } else if (instructionDatum instanceof ReportChecksumMismatchInstructionDatum) {
             responseLink.transmit(new GameZoneInstructionDatum(Engine.getInstance().getGameZone(responseLink)));
         }

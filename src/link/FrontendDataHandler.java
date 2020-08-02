@@ -3,15 +3,18 @@ package link;
 import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
 import link.instructions.*;
+import main.LiveLog;
+import main.LogHub;
 
 import static link.instructions.LogInResponseInstructionDatum.*;
 
-import java.net.Socket;
-
 public class FrontendDataHandler extends DataHandler {
     @Override
-    protected void connectionLost(Socket socket) {
-        //todo
+    protected void connectionLost(DataLink dataLink) {
+        if (dataLink instanceof LocalDataLink)
+            LogHub.logFatalCrash("Local connection lost", new IllegalStateException());
+        LiveLog.log("Lost connection to remote server.", LiveLog.LogEntryPriority.WARNING);
+        //todo - try to re-establish?
     }
 
     @Override
@@ -50,8 +53,6 @@ public class FrontendDataHandler extends DataHandler {
                     default:
                         throw new IllegalStateException("Unhandled response code: " + lirid.RESPONSE_CODE);
             }
-        } else if (instructionDatum instanceof LogOutInstructionDatum) {
-            responseLink.forceExpiration();
         } else {
                 //todo - more cases
                 throw new IllegalArgumentException("Unhandled InstructionDatum class: " + instructionDatum.getClass());
