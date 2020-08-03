@@ -2,70 +2,18 @@ package ai;
 
 import definitions.DefinitionsManager;
 import gamestate.coordinates.PointCoordinate;
-import gamestate.coordinates.TileCoordinate;
-import gamestate.gameobject.GameActor;
-import gamestate.gamezone.GameZone;
+import gamestate.coordinates.Coordinate;
+import gamestate.gameobject.MobileGameObject;
+import gamestate.terrain.TerrainTile;
 
 import java.util.ArrayList;
 
-//todo - good groundwork here, but probably needs a refactor based on MovementEvent redesign.
+/**
+ * Provide basic pathfinding functions.
+ */
 public class Pathfinder {
-    /**
-     * Find the point an actor moving to the targetTile will be at after one turn of movement.
-     */
-    public static PointCoordinate nextPoint(GameActor actor, TileCoordinate targetTile, GameZone zone) {
-        int speed = actor.getMovementSpeed();
-        PointCoordinate at = actor.getAt();
-        PointCoordinate to = PointCoordinate.centerOf(targetTile);
-        ArrayList<TileCoordinate> tilePath =
-                calculateTilePath(
-                        actor,
-                        targetTile,
-                        actor.getMovementAccess(),
-                        zone
-                );
-        if (tilePath == null) return at; //if no path is found, return the actor's current location.
-        PointCoordinate tempAt = at; //track where the actor is as we move
-        int tileIndex = 0;
-        int moveLeft = speed;
-        do {
-            //todo - draw a line of points tile by tile - look 2 ahead and draw a line from center to center, through
-            // the intervening tile? is there a better way?
-            //apply affects from the tile passed through here? does it even make sense to do that here? if not, where?
-            ++tileIndex;
-        } while (moveLeft > 0 && tileIndex < tilePath.size() - 1);
-        return tempAt;
-    }
 
-    /**
-     * Calculate a list of tiles which represent the shortest path from at to to in the specified zone.
-     * Return that list, or null if no path can be found.
-     */
-    private static ArrayList<TileCoordinate> calculateTilePath(GameActor actor, TileCoordinate to, int access, GameZone zone) {
-        ArrayList<TileCoordinate> shortestPath = shortestPath(actor.getAt().getParentTileCoordinate(), to);
-        while ( //traverse the shortest path in reverse until the final tile permits the actor to move to it
-                DefinitionsManager
-                        .lookupTerrain()
-                        .getMatterPermission(
-                                zone.tileAt(
-                                        shortestPath.get(
-                                                shortestPath.size() - 1
-                                        )
-                                )
-                        ) >= access
-        ) {
-            shortestPath.remove(shortestPath.size() - 1);
-        }
-        if (shortestPath.size() < 2) return null; //if one or zero tiles remain, no movement is possible.
-        //todo - a lot here: find the shortest path of tiles whose movement permissions do not exceed tile access,
-        // and which are currently not at or above their actor capacity. Ideally we should plan backwards, and simply
-        // remove tiles at the end of the path which don't meet these criteria (so if the player sends a movement event
-        // by clicking inside of a wall, the game will generate a move action in that direction). Ask the actor's AI
-        // about damage aversion? Let the Actor's AI do this entirely?
-        return null; //if no path can be found;
-    }
-
-    public static ArrayList<TileCoordinate> shortestPath(TileCoordinate tc1, TileCoordinate tc2) {
+    private static ArrayList<Coordinate> shortestPath(Coordinate tc1, Coordinate tc2) {
         //y = mx + b || x = (y - b) / m
         int x1 = tc1.COLUMN;
         int x2 = tc2.COLUMN;
@@ -74,15 +22,63 @@ public class Pathfinder {
         double m = (double)(y2 - y1) / (double)(x2 - x1);
         double b = (m * (double)y1) - (double)x1;
         boolean iterateX = m >= 1.0;
-        ArrayList<TileCoordinate> path = new ArrayList<>();
-        TileCoordinate next = tc1;
+        ArrayList<Coordinate> path = new ArrayList<>();
+        Coordinate next = tc1;
         while (!next.equals(tc2)) {
             path.add(next);
             next = iterateX ?
-                    new TileCoordinate(next.COLUMN + 1, (int)((m * (next.COLUMN + 1)) + b)) :
-                    new TileCoordinate((int)(((next.ROW + 1) - b) / m), next.ROW + 1);
+                    new Coordinate(next.COLUMN + 1, (int)((m * (next.COLUMN + 1)) + b)) :
+                    new Coordinate((int)(((next.ROW + 1) - b) / m), next.ROW + 1);
         }
         path.add(next);
         return path;
+    }
+
+    private static ArrayList<Coordinate> trajectory(Coordinate origin, int distance, double facing) {
+        double dx = (double)distance * Math.cos(facing);
+        double dy = (double)distance * Math.sin(facing);
+        Coordinate destination = new Coordinate((int)(origin.COLUMN + dx), (int)(origin.ROW + dy));
+        return shortestPath(origin, destination);
+    }
+
+    /**
+     * Cause a MobileGameObject to travel along its current trajectory as far as possible.
+     * We do this by getting the MGO's current position as a point coordinate, facing in radians,
+     * and speed in meters per turn(as they are now in this phase of execution, taking into account updates
+     * that may have been applied in previous phases, such as facing turns). From these values, we calculate a
+     * trajectory to the ideal final tile.
+     * For each point along this trajectory, we find the parent tile in the MGO's game zone and check its movement
+     * permission against the MGO's movement access. If the access is sufficient, we progress the actor along the
+     * trajectory - if not, we end the move.
+     */
+    //todo - this method must convey whether an MGO was stopped early. What we should probably do is return the
+    // planned path, then the actual path. If the actual path is shorter than the planned path, we know we had a
+    // premature stop. Further, we can calculate projectile interactions along the actual path.
+
+    //todo - we need to adapt this method to handle energetic projectiles eventually, and if so we need to convey
+    // any reduction that results from passing through translucent tiles.
+    public static PointCoordinate travel(MobileGameObject mgo, boolean forward) {
+        PointCoordinate at = mgo.getAt();
+        double direction = mgo.getFacing();
+        int speed = mgo.getMovementSpeed();
+        ArrayList<Coordinate> pathPoints =
+                trajectory(
+                        at,
+                        speed,
+                        forward ?
+                                direction
+                                : (Math.PI * 2) - direction
+                );
+        PointCoordinate pathPoint;
+        TerrainTile terrainTile;
+        for (int i = 1; i < pathPoints.size(); ++i) {
+            //interpret the trajectory coordinates as point coordinates so we can access their parent tile coordinates
+            pathPoint = new PointCoordinate(pathPoints.get(i));
+            terrainTile = mgo.getGameZone().tileAt(pathPoint.getParentTileCoordinate());
+            if (DefinitionsManager.lookupTerrain().getMatterPermission(terrainTile) < mgo.getMovementAccess())
+                at = pathPoint;
+            else break;
+        }
+        return at;
     }
 }

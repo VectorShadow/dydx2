@@ -1,13 +1,12 @@
 package gamestate.gameobject;
 
-import gamestate.coordinates.PointCoordinate;
 import gamestate.terrain.TerrainProperties;
 
 /**
  * Define a Projectile, which moves within or above the GameZone, but has no agency for generating events.
  * Implementations should extend this, defining fields according to their needs.
  */
-public abstract class GameProjectile extends SerialGameObject {
+public abstract class GameProjectile extends MobileGameObject {
 
     private static int serialCount = 0;
 
@@ -38,11 +37,6 @@ public abstract class GameProjectile extends SerialGameObject {
     private int currentRange = 0;
     private final int MAX_RANGE;
 
-    /**
-     * The current direction in which this projectile is travelling, in radians.
-     */
-    private double direction;
-
     public GameProjectile(boolean isDirect, int maxRange, int movementAccess, int speed) {
         DIRECT = isDirect;
         MAX_RANGE = maxRange;
@@ -55,20 +49,13 @@ public abstract class GameProjectile extends SerialGameObject {
         SPEED = speed;
     }
 
-    public double getDirection() {
-        return direction;
-    }
-
-    public int getSpeed() {
+    @Override
+    public int getMovementSpeed() {
         return SPEED;
     }
 
     public boolean isDirect() {
         return DIRECT;
-    }
-
-    public boolean isMaterial() {
-        return MOVEMENT_ACCESS > 0;
     }
 
     /**
@@ -77,10 +64,6 @@ public abstract class GameProjectile extends SerialGameObject {
      */
     public boolean progress() {
         return (currentRange += SPEED) >= MAX_RANGE;
-    }
-
-    public void setDirection(double direction) {
-        this.direction = direction;
     }
 
     @Override

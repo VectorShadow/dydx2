@@ -1,9 +1,10 @@
 package gamestate.gamezone;
 
 import gamestate.coordinates.PointCoordinate;
-import gamestate.coordinates.TileCoordinate;
+import gamestate.coordinates.Coordinate;
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameProjectile;
+import gamestate.gameobject.MobileGameObject;
 import gamestate.gameobject.SerialGameObject;
 import gamestate.terrain.TerrainTile;
 import main.LogHub;
@@ -110,31 +111,31 @@ public class GameZone {
      * If it is not found in its source terrain tile's tracker, throw an illegal state exception.
      */
     public void moveActor(int serialID, PointCoordinate pc) {
-        moveSerialGameObject(lookupActor(serialID), pc);
+        moveMobileGameObject(lookupActor(serialID), pc);
     }
     /**
      * Move the specified projectile to the specified destination point.
      * If it is not found in its source terrain tile's tracker, throw an illegal state exception.
      */
     public void moveProjectile(int serialID, PointCoordinate pc) {
-        moveSerialGameObject(lookupProjectile(serialID), pc);
+        moveMobileGameObject(lookupProjectile(serialID), pc);
     }
-    private void moveSerialGameObject(SerialGameObject sgo, PointCoordinate pc) {
-        TerrainTile source = tileAt(sgo.getAt().getParentTileCoordinate());
+    private void moveMobileGameObject(MobileGameObject mgo, PointCoordinate pc) {
+        TerrainTile source = tileAt(mgo.getAt().getParentTileCoordinate());
         TerrainTile destination = tileAt(pc.getParentTileCoordinate());
-        boolean isProjectile = sgo instanceof GameProjectile;
+        boolean isProjectile = mgo instanceof GameProjectile;
         //indirect projectiles are not tracked by terrain tiles.
-        if (isProjectile && !((GameProjectile)sgo).isDirect())
+        if (isProjectile && !((GameProjectile)mgo).isDirect())
             return;
-        ArrayList<SerialGameObject> sourceTracker = isProjectile ? source.projectileList : source.actorList;
-        ArrayList<SerialGameObject> destinationTracker =
+        ArrayList<MobileGameObject> sourceTracker = isProjectile ? source.projectileList : source.actorList;
+        ArrayList<MobileGameObject> destinationTracker =
                 isProjectile ? destination.projectileList : destination.actorList;
         if (source != destination) {
-            if (!sourceTracker.remove(sgo))
+            if (!sourceTracker.remove(mgo))
                 throw new IllegalStateException("Moved actor not found within its source tile tracker.");
-            destinationTracker.add(sgo);
+            destinationTracker.add(mgo);
         }
-        sgo.setAt(pc);
+        mgo.setAt(pc);
     }
 
     /**
@@ -168,7 +169,23 @@ public class GameZone {
             throw new IllegalStateException("Removed actor not found within the zone's actor map.");
     }
 
-    public TerrainTile tileAt(TileCoordinate tc) {
+    public void rotateActor(int serialID, double facingChange) {
+        GameActor ga = lookupActor(serialID);
+        rotateMobileGameObject(ga, facingChange);
+    }
+
+    public void rotateProjectile(int serialID, double facingChange) {
+        GameProjectile gp = lookupProjectile(serialID);
+        rotateMobileGameObject(gp, facingChange);
+    }
+
+    private void rotateMobileGameObject(MobileGameObject mgo, double facingChange) {
+        mgo.rotate(facingChange);
+    }
+
+
+
+    public TerrainTile tileAt(Coordinate tc) {
         return tileAt(tc.COLUMN, tc.ROW);
     }
     public TerrainTile tileAt(int column, int row) {

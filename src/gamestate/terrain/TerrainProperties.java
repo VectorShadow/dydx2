@@ -15,10 +15,9 @@ public abstract class TerrainProperties {
     public static final int ENERGY_PERMISSION_TRANSPARENT = 0;
 
     /**
-     * This value indicates that vision and energy projectile damage and penetration is reduced by half when passing
-     * through this terrain. This is multiplicative - if vision passes through two translucent tiles, the remaining
-     * radius will be one fourth of what it otherwise would have been, and an energy based projectile will have its
-     * damage and penetration quartered.
+     * This value indicates that vision terminates on this tile, while energy projectile damage and penetration is
+     * reduced by half when passing through this terrain. This is multiplicative - if an energy based projectile passes
+     * through two translucent tiles, it will have its damage and penetration quartered.
      */
     public static final int ENERGY_PERMISSION_TRANSLUCENT = 0;
 

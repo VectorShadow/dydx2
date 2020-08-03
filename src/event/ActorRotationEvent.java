@@ -1,23 +1,21 @@
 package event;
 
-import ai.Pathfinder;
+import gamestate.gameobject.GameActor;
 import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
-import gamestate.coordinates.PointCoordinate;
-import gamestate.gameobject.GameActor;
 import main.LogHub;
 
 import java.util.ArrayList;
 
-public class ActorMovementEvent extends Event {
+public class ActorRotationEvent extends Event {
 
     private final GameActor ACTOR;
-    private final boolean FORWARD;
+    private final boolean CLOCKWISE;
 
-    public ActorMovementEvent(GameActor gameActor, boolean forward) {
-        super(ExecutionOrder.SECONDARY);
-        ACTOR = gameActor;
-        FORWARD = forward;
+    public ActorRotationEvent(GameActor actor, boolean clockwise) {
+        super(ExecutionOrder.IMMEDIATE);
+        ACTOR = actor;
+        CLOCKWISE = clockwise;
     }
 
     @Override
@@ -27,12 +25,12 @@ public class ActorMovementEvent extends Event {
             updateList.add(
                     new GameZoneUpdate(
                             GameZone.class.getDeclaredMethod(
-                                    "moveActor",
+                                    "rotateActor",
                                     int.class,
-                                    PointCoordinate.class
+                                    double.class
                             ),
                             ACTOR,
-                            Pathfinder.travel(ACTOR, FORWARD)
+                            CLOCKWISE ? 0 - ACTOR.getTurningSpeed() : ACTOR.getTurningSpeed()
                     )
             );
         } catch (NoSuchMethodException e) {
