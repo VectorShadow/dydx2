@@ -82,6 +82,11 @@ public class BackendDataHandler extends DataHandler {
             Engine.getInstance().disconnectDataLink(responseLink); //instruct the engine to properly remove the link
         } else if (instructionDatum instanceof ReportChecksumMismatchInstructionDatum) {
             responseLink.transmit(new GameZoneInstructionDatum(Engine.getInstance().getGameZone(responseLink)));
+        } else if (instructionDatum instanceof SelectAvatarInstructionData) {
+            Engine.getInstance().connectUserAvatar(
+                    responseLink,
+                    ((SelectAvatarInstructionData)instructionDatum).USER_AVATAR
+            );
         }
     }
 }

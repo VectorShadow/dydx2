@@ -1,13 +1,12 @@
 package gamestate.gameobject;
 
+import gamestate.TransmittableGameAsset;
 import gamestate.gamezone.GameZone;
-
-import java.io.Serializable;
 
 /**
  * A top level abstraction for all objects tracked by the gamestate.
  */
-public abstract class GameObject implements Serializable {
+public abstract class GameObject extends TransmittableGameAsset {
     //All GameObjects must know which zone they are in.
     private GameZone GAME_ZONE = null;
 

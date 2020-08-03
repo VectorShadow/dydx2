@@ -41,8 +41,8 @@ public abstract class GameProjectile extends MobileGameObject {
         DIRECT = isDirect;
         MAX_RANGE = maxRange;
         if (movementAccess >= 0 &&
-                (movementAccess < TerrainProperties.MATTER_PERMISSION_ORIBITAL
-                        || movementAccess > TerrainProperties.MATTER_PERMISSION_ETHEREAL))
+                (movementAccess < TerrainProperties.MATTER_PERMISSION_SHEER
+                        || movementAccess > TerrainProperties.MATTER_PERMISSION_ETHER))
             throw new IllegalArgumentException("Invalid movement access, must be -1, 4, 5, or 6 (was "
                     + movementAccess + ").");
         MOVEMENT_ACCESS = movementAccess;

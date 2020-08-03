@@ -1,9 +1,13 @@
 package gamestate.coordinates;
 
+import gamestate.TransmittableGameAsset;
+
+import java.io.Serializable;
+
 /**
  * Specify the coordinates of a specific tile within a gamezone.
  */
-public class Coordinate {
+public class Coordinate extends TransmittableGameAsset {
     public final int COLUMN;
     public final int ROW;
 

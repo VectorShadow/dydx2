@@ -6,6 +6,7 @@ import gamestate.coordinates.ZoneCoordinate;
 import link.DataLink;
 import link.instructions.GameZoneInstructionDatum;
 import user.UserAccount;
+import user.UserAvatar;
 
 import java.util.ArrayList;
 
@@ -97,10 +98,11 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
     /**
      * Connect a DataLinkSession to a ZoneSession once a user has selected an avatar.
      */
-    void connectLinkToZone(DataLink dataLink) {
+    void connectLinkToZone(DataLink dataLink, UserAvatar userAvatar) {
         DataLinkSession dls = get(dataLink);
         UserAccount ua = dls.userAccount;
-        ZoneCoordinate zc = ua.getCurrentAvatar().getAt();
+        ua.setCurrentAvatar(userAvatar);
+        ZoneCoordinate zc = userAvatar.getAt();
         ZoneSession zs = get(zc);
         if (zs == null) {
             addZoneProcessor(dataLink, DefinitionsManager.generateZone(zc), zc);

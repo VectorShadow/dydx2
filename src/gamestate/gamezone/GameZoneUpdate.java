@@ -1,10 +1,11 @@
 package gamestate.gamezone;
 
+import gamestate.TransmittableGameAsset;
 import gamestate.gameobject.SerialGameObject;
 
 import java.lang.reflect.Method;
 
-public class GameZoneUpdate {
+public class GameZoneUpdate extends TransmittableGameAsset {
 
     public final Method METHOD;
 

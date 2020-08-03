@@ -75,7 +75,7 @@ public class Pathfinder {
             //interpret the trajectory coordinates as point coordinates so we can access their parent tile coordinates
             pathPoint = new PointCoordinate(pathPoints.get(i));
             terrainTile = mgo.getGameZone().tileAt(pathPoint.getParentTileCoordinate());
-            if (DefinitionsManager.lookupTerrain().getMatterPermission(terrainTile) < mgo.getMovementAccess())
+            if (DefinitionsManager.lookupTerrain().checkAccess(mgo, terrainTile))
                 at = pathPoint;
             else break;
         }

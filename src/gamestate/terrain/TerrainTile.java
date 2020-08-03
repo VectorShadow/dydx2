@@ -1,5 +1,6 @@
 package gamestate.terrain;
 
+import gamestate.TransmittableGameAsset;
 import gamestate.gameobject.*;
 
 import java.util.ArrayList;
@@ -7,7 +8,7 @@ import java.util.ArrayList;
 /**
  * The basic entity which defines the game world.
  */
-public class TerrainTile {
+public class TerrainTile extends TransmittableGameAsset {
     //this value provides implementation specific lookup information
     public short ID;
 

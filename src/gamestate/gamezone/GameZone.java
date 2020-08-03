@@ -1,11 +1,11 @@
 package gamestate.gamezone;
 
+import gamestate.TransmittableGameAsset;
 import gamestate.coordinates.PointCoordinate;
 import gamestate.coordinates.Coordinate;
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameProjectile;
 import gamestate.gameobject.MobileGameObject;
-import gamestate.gameobject.SerialGameObject;
 import gamestate.terrain.TerrainTile;
 import main.LogHub;
 
@@ -19,7 +19,7 @@ import java.util.Map;
  * GameZones represent towns, fields, dungeons, and other such areas of a game to which one or more players
  * may be connected, and on which all game activity occurs.
  */
-public class GameZone {
+public class GameZone extends TransmittableGameAsset {
 
     /**
      * This is the game zone presented to the front end.
@@ -76,6 +76,21 @@ public class GameZone {
         ACTOR_MAP = Collections.synchronizedMap(new HashMap<Integer, GameActor>());
         PROJECTILE_LIST = new ArrayList<>();
         PROJECTILE_MAP = Collections.synchronizedMap(new HashMap<Integer, GameProjectile>());
+    }
+
+    public void addActor(GameActor actor) {
+        //todo - check this terrain tile to see if it can fit an actor here!
+        // does that check go here and throw an exception? or at whatever calls this?
+        ACTOR_MAP.put(actor.getSerialID(), actor);
+        ACTOR_LIST.add(actor);
+        Coordinate c = actor.getAt().getParentTileCoordinate();
+        TERRAIN[c.ROW][c.COLUMN].actorList.add(actor);
+    }
+    public void addProjectile(GameProjectile projectile) {
+        PROJECTILE_MAP.put(projectile.getSerialID(), projectile);
+        PROJECTILE_LIST.add(projectile);
+        Coordinate c = projectile.getAt().getParentTileCoordinate();
+        TERRAIN[c.ROW][c.COLUMN].projectileList.add(projectile);
     }
 
     private GameActor lookupActor(int serialID) {
@@ -211,5 +226,6 @@ public class GameZone {
         } catch (InvocationTargetException e) {
             LogHub.logFatalCrash("Update failure - InvocationTargetException", e);
         }
+        System.out.println("Applying update.... actor at: " + ACTOR_LIST.get(0).getAt());
     }
 }

@@ -12,14 +12,7 @@ public abstract class TerrainProperties {
     /**
      * This value indicates that vision and energy projectiles may pass through this terrain freely.
      */
-    public static final int ENERGY_PERMISSION_TRANSPARENT = 0;
-
-    /**
-     * This value indicates that vision terminates on this tile, while energy projectile damage and penetration is
-     * reduced by half when passing through this terrain. This is multiplicative - if an energy based projectile passes
-     * through two translucent tiles, it will have its damage and penetration quartered.
-     */
-    public static final int ENERGY_PERMISSION_TRANSLUCENT = 0;
+    public static final int ENERGY_PERMISSION_TRANSPARENT = 1;
 
     /**
      * This value indicates that vision and energy projectiles will terminate on this tile. Both will still affect this
@@ -29,57 +22,55 @@ public abstract class TerrainProperties {
 
     /**
      * This value indicates that any entity capable of movement may pass this tile with no penalty.
-     * No actor may have a movement permission this low.
+     * Rolling and primitive walking actors should have this permission.
      */
     public static final int MATTER_PERMISSION_FREE = 0;
     
     /**
-     * This value indicates that the terrain is rough and may not be ideal for all movable entities.
-     * Rolling and primitive walking actors should have this permission.
-     */
-    public static final int MATTER_PERMISSION_ROUGH = 1;
-
-    /**
-     * This value indicates that the terrain is perilous to traverse. This might indicate a steep slope or river rapids
-     * which require special capabilities to traverse safely.
+     * This value indicates that the terrain is uneven and may not be ideal for all movable entities.
      * Most walking actors should have this permission.
      */
-    public static final int MATTER_PERMISSION_PERILOUS = 2;
+    public static final int MATTER_PERMISSION_UNEVEN = 1;
+
+    /**
+     * This value indicates that the terrain contains obstacles to simple movement.
+     * This might indicate a steep slope or river rapids which require special capabilities to traverse safely.
+     * Climbing and jumping actors should have this permission.
+     */
+    public static final int MATTER_PERMISSION_OBSTACLE = 2;
 
     /**
      * This value indicates that the terrain can only be safely traversed by an actor which does not require 
-     * gravitational traction with the ground to move. This might indicate a low wall or small chasm which can be
-     * scaled or jumped by a climbing actor if necessary, but otherwise must be flown over.
-     * Climbing and jumping actors should have this permission.
-     */
-    public static final int MATTER_PERMISSION_AIRBORNE = 3;
-
-    /**
-     * This value indicates that the terrain can only be traversed by very high flying actors and projectiles.
-     * Flying actors should have this permission.
+     * gravitational traction with the ground to move. This might indicate a wall or chasm too steep or large
+     * to be climbed or jumped over, and must be flown over.
+     * Hovering or low-lying actors should have this permission.
      * All direct fire projectiles should have this permission.
      */
-    public static final int MATTER_PERMISSION_ORIBITAL = 4;
+    public static final int MATTER_PERMISSION_SHEER = 3;
+
+    /**
+     * This value indicates that the terrain can only be traversed by very high flying actors and arcing projectiles.
+     * High altitude actors and indirect fire projectiles should have this permission.
+     */
+    public static final int MATTER_PERMISSION_SKY = 4;
     
     /**
-     * This value indicates that the terrain is a void in space and can only be safely traversed by 
-     * space capable actors or projectiles.
-     * Space capable actors should have this permission.
-     * Indirect fire projectiles and deep space munitions should have this permission.
+     * This value indicates that the terrain is a vacuum, and can only be traversed by entities specifically engineered
+     * to survive there.
+     * Space capable Actors and space based projectiles should have this permission.
      */
     public static final int MATTER_PERMISSION_VOID = 5;
 
     /**
      * This value indicates a solid terrain feature such as a wall that can only be passed through by insubstantial
      * actors or projectiles.
-     * Ethereal beings should have this permission.
-     * Phased projectiles should have this permission.
+     * Ethereal beings and phased projectiles should have this permission.
      */
-    public static final int MATTER_PERMISSION_ETHEREAL = 6;
+    public static final int MATTER_PERMISSION_ETHER = 6;
 
     /**
-     * This value indicates a completely impassable terrain feature, such as a Zone boundary. No actor may have movement
-     * permissions at this level.
+     * This value indicates a completely impassable terrain feature, such as a Zone boundary. No actor or projectile
+     * may have movement permissions at this level.
      */
     public static final int MATTER_PERMISSION_IMPASSABLE = 7;
 
@@ -90,13 +81,11 @@ public abstract class TerrainProperties {
 
     /**
      * This value indicates what kinds of movement may pass through this terrain and at what cost.
-     * Any actor with a movement value greater than this value may pass the terrain at no penalty.
-     * Any actor with a movement value equal to this value may pass through the terrain, but may not stop
-     * there.
-     * Any actor with a movement value less than this value may not pass through the terrain.
-     * Any projectile with movement value greater than or equal to this value may advance along a trajectory
-     * through this terrain.
-     * Any projectile with movement value less than this value will terminate its trajectory upon reaching this terrain.
+     * Actors with a movement access level greater than or equal to this value may pass through this terrain.
+     * If their movement access level is lower than this value they may not enter this terrain.
+     * Projectiles with a movement access level greater than or equal to this value may pass through this terrain.
+     * If their movement access level is lower than this value, they will terminate their trajectories upon attempting
+     * to enter this terrain.
      */
     public final int MATTER_PERMISSION;
     

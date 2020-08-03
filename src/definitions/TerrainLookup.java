@@ -1,5 +1,6 @@
 package definitions;
 
+import gamestate.gameobject.MobileGameObject;
 import gamestate.terrain.TerrainProperties;
 import gamestate.terrain.TerrainTile;
 
@@ -10,11 +11,21 @@ import gamestate.terrain.TerrainTile;
 public abstract class TerrainLookup {
     protected abstract TerrainProperties lookup(short terrainID);
 
-    public int getEnergyPermission(TerrainTile tt) {
+    /**
+     * Check the access of a MobileGameObject against the permission of a terrain tile's properties.
+     * @return whether the object can pass into and through the terrain.
+     */
+    public boolean checkAccess(MobileGameObject mgo, TerrainTile tt) {
+        return mgo.isMaterial() ?
+                mgo.getMovementAccess() >= getMatterPermission(tt)
+                : (getEnergyPermission(tt) > 0);
+    }
+
+    private int getEnergyPermission(TerrainTile tt) {
         return lookup(tt.ID).ENERGY_PERMISSION;
     }
 
-    public int getMatterPermission(TerrainTile tt) {
+    private int getMatterPermission(TerrainTile tt) {
         return lookup(tt.ID).MATTER_PERMISSION;
     }
 }

@@ -3,6 +3,7 @@ package main;
 import gamestate.gamezone.GameZone;
 import link.DataLink;
 import user.UserAccount;
+import user.UserAvatar;
 
 import static main.LiveLog.LogEntryPriority.*;
 
@@ -152,8 +153,8 @@ public class Engine extends Thread {
     /**
      * On avatar selection: associate a data link with a zone session corresponding to the avatar's world location.
      */
-    public void connectUserAvatar(DataLink dataLink) {
-        LINK_TO_ZONE_AGGREGATOR.connectLinkToZone(dataLink);
+    public void connectUserAvatar(DataLink dataLink, UserAvatar userAvatar) {
+        LINK_TO_ZONE_AGGREGATOR.connectLinkToZone(dataLink, userAvatar);
     }
 
     /**
@@ -167,7 +168,7 @@ public class Engine extends Thread {
      * On avatar release: disassociate a data link with its zone session.
      */
     public void disconnectUserAvatar(DataLink dataLink) {
-        LINK_TO_ZONE_AGGREGATOR.connectLinkToZone(dataLink);
+        LINK_TO_ZONE_AGGREGATOR.disconnectLinkFromZone(dataLink);
     }
 
     /**

@@ -1,9 +1,11 @@
 package gamestate.coordinates;
 
+import gamestate.TransmittableGameAsset;
+
 /**
  * Specify the world location of a GameZone.
  */
-public class ZoneCoordinate implements Comparable<ZoneCoordinate> {
+public class ZoneCoordinate extends TransmittableGameAsset implements Comparable<ZoneCoordinate> {
 
     /**
      * The unique location id of the origin zone.

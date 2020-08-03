@@ -34,7 +34,7 @@ public abstract class MobileGameObject extends SerialGameObject {
      * @return the turning speed of this actor, or fast it can change its facing in a turn.
      * The implementation is responsible for calculating a value for this.
      */
-    public abstract int getTurningSpeed();
+    public abstract double getTurningSpeed();
 
     /**
      * @return whether this mobile object follows material or energy rules of interaction.
