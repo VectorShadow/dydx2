@@ -93,11 +93,11 @@ public class GameZone extends TransmittableGameAsset {
         TERRAIN[c.ROW][c.COLUMN].projectileList.add(projectile);
     }
 
-    private GameActor lookupActor(int serialID) {
+    private GameActor lookupActor(Integer serialID) {
         return (GameActor) ACTOR_MAP.get(serialID);
     }
 
-    private GameProjectile lookupProjectile(int serialID) {
+    private GameProjectile lookupProjectile(Integer serialID) {
         return (GameProjectile) PROJECTILE_MAP.get(serialID);
     }
 
@@ -125,14 +125,14 @@ public class GameZone extends TransmittableGameAsset {
      * Move the specified actor to the specified destination point.
      * If it is not found in its source terrain tile's tracker, throw an illegal state exception.
      */
-    public void moveActor(int serialID, PointCoordinate pc) {
+    public void moveActor(Integer serialID, PointCoordinate pc) {
         moveMobileGameObject(lookupActor(serialID), pc);
     }
     /**
      * Move the specified projectile to the specified destination point.
      * If it is not found in its source terrain tile's tracker, throw an illegal state exception.
      */
-    public void moveProjectile(int serialID, PointCoordinate pc) {
+    public void moveProjectile(Integer serialID, PointCoordinate pc) {
         moveMobileGameObject(lookupProjectile(serialID), pc);
     }
     private void moveMobileGameObject(MobileGameObject mgo, PointCoordinate pc) {
@@ -158,7 +158,7 @@ public class GameZone extends TransmittableGameAsset {
      * is in, then from the actor list, and finally from the actor map.
      * If it is not found in any of these places, throw an illegal state exception.
      */
-    public void removeActor(int serialID) {
+    public void removeActor(Integer serialID) {
         GameActor ga = lookupActor(serialID);
         if (!(tileAt(ga.getAt().getParentTileCoordinate()).actorList.remove(ga)))
             throw new IllegalStateException("Removed actor not found within its tile tracker.");
@@ -173,7 +173,7 @@ public class GameZone extends TransmittableGameAsset {
      * is in, then from the projectile list, and finally from the projectile map.
      * If it is not found in any of these places, throw an illegal state exception.
      */
-    public void removeProjectile(int serialID) {
+    public void removeProjectile(Integer serialID) {
         GameProjectile gp = lookupProjectile(serialID);
         //indirect projectiles are not tracked my terrain tiles
         if (gp.isDirect() && !(tileAt(gp.getAt().getParentTileCoordinate()).actorList.remove(gp)))
@@ -184,17 +184,17 @@ public class GameZone extends TransmittableGameAsset {
             throw new IllegalStateException("Removed actor not found within the zone's actor map.");
     }
 
-    public void rotateActor(int serialID, double facingChange) {
+    public void rotateActor(Integer serialID, Double facingChange) {
         GameActor ga = lookupActor(serialID);
         rotateMobileGameObject(ga, facingChange);
     }
 
-    public void rotateProjectile(int serialID, double facingChange) {
+    public void rotateProjectile(Integer serialID, Double facingChange) {
         GameProjectile gp = lookupProjectile(serialID);
         rotateMobileGameObject(gp, facingChange);
     }
 
-    private void rotateMobileGameObject(MobileGameObject mgo, double facingChange) {
+    private void rotateMobileGameObject(MobileGameObject mgo, Double facingChange) {
         mgo.rotate(facingChange);
     }
 
@@ -203,7 +203,7 @@ public class GameZone extends TransmittableGameAsset {
     public TerrainTile tileAt(Coordinate tc) {
         return tileAt(tc.COLUMN, tc.ROW);
     }
-    public TerrainTile tileAt(int column, int row) {
+    private TerrainTile tileAt(int column, int row) {
         return TERRAIN[row][column];
     }
 
@@ -219,13 +219,14 @@ public class GameZone extends TransmittableGameAsset {
 
     public void apply(GameZoneUpdate update) {
         try {
-            update.METHOD.invoke(this, update.ARGUMENTS);
+            update.toMethod().invoke(this, update.ARGUMENTS);
             ++checkSum;
         } catch (IllegalAccessException e) {
             LogHub.logFatalCrash("Update failure - IllegalAccessException", e);
         } catch (InvocationTargetException e) {
             LogHub.logFatalCrash("Update failure - InvocationTargetException", e);
+        } catch (NoSuchMethodException e) {
+            LogHub.logFatalCrash("Update failure - NoSuchMethodException", e);
         }
-        System.out.println("Applying update.... actor at: " + ACTOR_LIST.get(0).getAt());
     }
 }

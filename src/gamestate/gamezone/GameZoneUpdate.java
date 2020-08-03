@@ -7,12 +7,12 @@ import java.lang.reflect.Method;
 
 public class GameZoneUpdate extends TransmittableGameAsset {
 
-    public final Method METHOD;
+    public final String METHOD_NAME;
 
     public final Object[] ARGUMENTS;
 
-    public GameZoneUpdate(Method m, Object... args) {
-        METHOD = m;
+    public GameZoneUpdate(String methodName, Object... args) {
+        METHOD_NAME = methodName;
         ARGUMENTS = new Object[args.length];
         for (int i = 0; i < args.length; ++i) {
             Object arg = args[i];
@@ -23,5 +23,15 @@ public class GameZoneUpdate extends TransmittableGameAsset {
              */
             ARGUMENTS[i] = arg instanceof SerialGameObject ? ((SerialGameObject)arg).getSerialID() : arg;
         }
+    }
+
+    public Method toMethod() throws NoSuchMethodException {
+        Class<?>[] argClasses = new Class<?>[ARGUMENTS.length];
+        for (int i = 0; i < ARGUMENTS.length; ++i)
+            argClasses[i] = ARGUMENTS[i].getClass();
+        return GameZone.class.getDeclaredMethod(
+                METHOD_NAME,
+                argClasses
+        );
     }
 }

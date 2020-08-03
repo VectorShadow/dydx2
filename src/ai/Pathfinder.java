@@ -14,21 +14,33 @@ import java.util.ArrayList;
 public class Pathfinder {
 
     private static ArrayList<Coordinate> shortestPath(Coordinate tc1, Coordinate tc2) {
-        //y = mx + b || x = (y - b) / m
+        //y = mx + b || x = (y - b) / m || b = y - mx
         int x1 = tc1.COLUMN;
         int x2 = tc2.COLUMN;
         int y1 = tc1.ROW;
         int y2 = tc2.ROW;
-        double m = (double)(y2 - y1) / (double)(x2 - x1);
-        double b = (m * (double)y1) - (double)x1;
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+        double m = (double)dy / (double)dx;
+        double b = (double)y1 - (m * (double)x1);
         boolean iterateX = m >= 1.0;
+        int stepX = dx > 0 ? 1 : -1;
+        int stepY = dy > 0 ? 1 : -1;
+        boolean slopeZero = dy == 0;
+        boolean slopeInf = dx == 0;
         ArrayList<Coordinate> path = new ArrayList<>();
         Coordinate next = tc1;
         while (!next.equals(tc2)) {
             path.add(next);
-            next = iterateX ?
-                    new Coordinate(next.COLUMN + 1, (int)((m * (next.COLUMN + 1)) + b)) :
-                    new Coordinate((int)(((next.ROW + 1) - b) / m), next.ROW + 1);
+            next = slopeZero ?
+                    new Coordinate(next.COLUMN + stepX, next.ROW)
+                    : slopeInf ?
+                    new Coordinate(next.COLUMN, next.ROW + stepY)
+                    : iterateX ?
+                    new Coordinate(
+                            next.COLUMN + stepX,
+                            (int)Math.round((m * (next.COLUMN + stepX)) + b))
+                    : new Coordinate((int)Math.round(((next.ROW + stepY) - b) / m), next.ROW + stepY);
         }
         path.add(next);
         return path;
@@ -37,7 +49,7 @@ public class Pathfinder {
     private static ArrayList<Coordinate> trajectory(Coordinate origin, int distance, double facing) {
         double dx = (double)distance * Math.cos(facing);
         double dy = (double)distance * Math.sin(facing);
-        Coordinate destination = new Coordinate((int)(origin.COLUMN + dx), (int)(origin.ROW + dy));
+        Coordinate destination = new Coordinate((int)Math.round(origin.COLUMN + dx), (int)Math.round(origin.ROW + dy));
         return shortestPath(origin, destination);
     }
 

@@ -14,7 +14,8 @@ public class FrontendDataHandler extends DataHandler {
         if (dataLink instanceof LocalDataLink)
             LogHub.logFatalCrash("Local connection lost", new IllegalStateException());
         LiveLog.log("Lost connection to remote server.", LiveLog.LogEntryPriority.WARNING);
-        //todo - try to re-establish?
+        //todo - try to re-establish? for now, close the program.
+        System.exit(-3);
     }
 
     @Override

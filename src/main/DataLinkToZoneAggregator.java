@@ -48,7 +48,6 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         dls.zoneSession = zs;
         zs.LINKS.add(dls);
         zoneSessions.add(zs);
-        dl.transmit(new GameZoneInstructionDatum(dls.zoneSession.getGameZone()));
         LiveLog.log("Connected dataLink to new Zone at " + zc + ". ", INFO);
     }
 
@@ -63,7 +62,6 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         dls.zoneSession = zs;
         zs.LINKS.add(dls);
         zs.expired = false; //un-flag this zone as expired if it receives a connection
-        dl.transmit(new GameZoneInstructionDatum(dls.zoneSession.getGameZone()));
         LiveLog.log(
                 "Connected dataLink to existing Zone at " + zc + ". Zone now has " + zs.LINKS.size() +
                 " connected DataLinks.",
@@ -105,8 +103,13 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         ZoneCoordinate zc = userAvatar.getAt();
         ZoneSession zs = get(zc);
         if (zs == null) {
-            addZoneProcessor(dataLink, DefinitionsManager.generateZone(zc), zc);
+            GameZone gz = DefinitionsManager.generateZone(zc);
+            //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
+            dataLink.transmit(new GameZoneInstructionDatum(gz));
+            addZoneProcessor(dataLink, gz, zc);
         } else {
+            //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
+            dataLink.transmit(new GameZoneInstructionDatum(dls.zoneSession.getGameZone()));
             connect(dataLink, zc);
         }
         LiveLog.log("Connected user " + ua.getName() + " to GameZone at " + zc, INFO);

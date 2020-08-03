@@ -21,21 +21,13 @@ public class ProjectileRotationEvent extends Event {
     @Override
     public ArrayList<GameZoneUpdate> execute() {
         ArrayList<GameZoneUpdate> updateList = new ArrayList<>();
-        try {
-            updateList.add(
-                    new GameZoneUpdate(
-                            GameZone.class.getDeclaredMethod(
-                                    "rotateProjectile",
-                                    int.class,
-                                    double.class
-                            ),
-                            PROJECTILE,
-                            CLOCKWISE ? 0 - PROJECTILE.getTurningSpeed() : PROJECTILE.getTurningSpeed()
-                    )
-            );
-        } catch (NoSuchMethodException e) {
-            LogHub.logFatalCrash("No such method", e);
-        }
+        updateList.add(
+                new GameZoneUpdate(
+                        "rotateProjectile",
+                        PROJECTILE,
+                        CLOCKWISE ? 0 - PROJECTILE.getTurningSpeed() : PROJECTILE.getTurningSpeed()
+                )
+        );
         return updateList;
     }
 }

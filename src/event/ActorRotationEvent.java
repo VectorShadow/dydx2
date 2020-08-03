@@ -21,21 +21,13 @@ public class ActorRotationEvent extends Event {
     @Override
     public ArrayList<GameZoneUpdate> execute() {
         ArrayList<GameZoneUpdate> updateList = new ArrayList<>();
-        try {
-            updateList.add(
-                    new GameZoneUpdate(
-                            GameZone.class.getDeclaredMethod(
-                                    "rotateActor",
-                                    int.class,
-                                    double.class
-                            ),
-                            ACTOR,
-                            CLOCKWISE ? 0 - ACTOR.getTurningSpeed() : ACTOR.getTurningSpeed()
-                    )
-            );
-        } catch (NoSuchMethodException e) {
-            LogHub.logFatalCrash("No such method", e);
-        }
+        updateList.add(
+                new GameZoneUpdate(
+                        "rotateActor",
+                        ACTOR,
+                        CLOCKWISE ? 0 - ACTOR.getTurningSpeed() : ACTOR.getTurningSpeed()
+                )
+        );
         return updateList;
     }
 }

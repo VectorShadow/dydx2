@@ -21,38 +21,27 @@ public class ProjectileMovementEvent extends Event {
     @Override
     public ArrayList<GameZoneUpdate> execute() {
         ArrayList<GameZoneUpdate> updateList = new ArrayList<>();
-        try {
-            if (PROJECTILE.isDirect()) {
-                //todo - handle disposal if travel() comes up short
-                //todo - handle projectile interactions if they occur
-                updateList.add(
-                        new GameZoneUpdate(
-                                GameZone.class.getDeclaredMethod(
-                                        "moveProjectile",
-                                        int.class,
-                                        PointCoordinate.class
-                                ),
-                                PROJECTILE,
-                                Pathfinder.travel(PROJECTILE, true)
-                        )
-                );
+        if (PROJECTILE.isDirect()) {
+            //todo - handle disposal if travel() comes up short
+            //todo - handle projectile interactions if they occur
+            updateList.add(
+                    new GameZoneUpdate(
+                            "moveProjectile",
+                            PROJECTILE,
+                            Pathfinder.travel(PROJECTILE, true)
+                    )
+            );
+        }
+        if (PROJECTILE.progress()) {
+            if (!PROJECTILE.isDirect()) {
+                //todo - indirect projectiles land and must be resolved
             }
-            if (PROJECTILE.progress()) {
-                if (!PROJECTILE.isDirect()) {
-                    //todo - indirect projectiles land and must be resolved
-                }
-                updateList.add(
-                        new GameZoneUpdate(
-                                GameZone.class.getDeclaredMethod(
-                                        "removeProjectile",
-                                        GameProjectile.class
-                                ),
-                                PROJECTILE
-                        )
-                );
-            }
-        } catch (NoSuchMethodException e) {
-            LogHub.logFatalCrash("No such method", e);
+            updateList.add(
+                    new GameZoneUpdate(
+                            "removeProjectile",
+                            PROJECTILE
+                    )
+            );
         }
         return updateList;
     }
