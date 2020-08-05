@@ -81,9 +81,15 @@ public class GameZone extends TransmittableGameAsset {
     public void addActor(GameActor actor) {
         //todo - check this terrain tile to see if it can fit an actor here!
         // does that check go here and throw an exception? or at whatever calls this?
+        actor.setGameZone(this);
         ACTOR_MAP.put(actor.getSerialID(), actor);
         ACTOR_LIST.add(actor);
-        Coordinate c = actor.getAt().getParentTileCoordinate();
+        PointCoordinate pc = actor.getAt();
+        if (pc == null) {
+            placeActor(actor); //todo - this method is currently a hack, fix it
+            pc = actor.getAt();
+        }
+        Coordinate c = pc.getParentTileCoordinate();
         TERRAIN[c.ROW][c.COLUMN].actorList.add(actor);
     }
     public void addProjectile(GameProjectile projectile) {
@@ -151,6 +157,17 @@ public class GameZone extends TransmittableGameAsset {
             destinationTracker.add(mgo);
         }
         mgo.setAt(pc);
+    }
+
+    /**
+     * Place an actor which does not currently have a point coordinate into this zone.
+     * @param gameActor
+     */
+    private void placeActor(GameActor gameActor){
+        //todo - for now, this is a hack. In the future, we should find a good way of doing this - spawn enemies in
+        // appropriate regions, player avatar actors at entrances or stairs/ramps, etc.
+        Coordinate centerTile = new Coordinate(COLUMNS / 2, ROWS / 2);
+        gameActor.setAt(PointCoordinate.centerOf(centerTile));
     }
 
     /**
@@ -228,5 +245,8 @@ public class GameZone extends TransmittableGameAsset {
         } catch (NoSuchMethodException e) {
             LogHub.logFatalCrash("Update failure - NoSuchMethodException", e);
         }
+        //test
+        if (update.METHOD_NAME.equals("moveActor"))
+            System.out.println("Player actor is now at " + ACTOR_LIST.get(0).getAt() + " facing " + ACTOR_LIST.get(0).getFacing());
     }
 }

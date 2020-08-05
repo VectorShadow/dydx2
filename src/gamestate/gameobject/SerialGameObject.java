@@ -13,19 +13,10 @@ public abstract class SerialGameObject extends GameObject {
     //provide a value for hashing serial game objects
     private static final int HASH_CONSTANT = 256;
 
-    /**
-     * This object's exact position in its current zone.
-     */
-    protected PointCoordinate at;
-
     protected final int serialID;
 
     public SerialGameObject() {
         serialID = nextSerialID();
-    }
-
-    public PointCoordinate getAt() {
-        return at;
     }
 
     public int getSerialID() {
@@ -34,9 +25,6 @@ public abstract class SerialGameObject extends GameObject {
 
     protected abstract int nextSerialID();
 
-    public void setAt(PointCoordinate at) {
-        this.at = at;
-    }
     /**
      * Since serial game objects within a Zone are usually generated in quick succession, when the Zone is created,
      * a modulus based hash function provides the fewest collisions. As the number of objects grow beyond the value of

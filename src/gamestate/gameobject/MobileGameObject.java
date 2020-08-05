@@ -1,15 +1,28 @@
 package gamestate.gameobject;
 
 import event.Event;
+import gamestate.coordinates.PointCoordinate;
 
 import java.util.ArrayList;
 
 public abstract class MobileGameObject extends SerialGameObject {
 
     /**
+     * This object's exact position in its current zone.
+     */
+    protected PointCoordinate at = null;
+
+    /**
      * The current facing of this mobile object, in radians.
      */
-    private double facing;
+    private double facing = 0.0;
+
+    /**
+     * @return the current point coordinate this mobile object is centered on.
+     */
+    public PointCoordinate getAt() {
+        return at;
+    }
 
     /**
      * @return the current facing of this mobile object in radians.
@@ -53,6 +66,13 @@ public abstract class MobileGameObject extends SerialGameObject {
         while (facingChange <= 0 - (2 * Math.PI))
             facingChange += 2 * Math.PI;
         setFacing(getFacing() + facingChange);
+    }
+
+    /**
+     * Set the current PointCoordinate this actor is centered on.
+     */
+    public void setAt(PointCoordinate at) {
+        this.at = at;
     }
 
     /**

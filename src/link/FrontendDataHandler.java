@@ -5,6 +5,7 @@ import gamestate.gamezone.GameZoneUpdate;
 import link.instructions.*;
 import main.LiveLog;
 import main.LogHub;
+import user.UserAccount;
 
 import static link.instructions.LogInResponseInstructionDatum.*;
 
@@ -49,7 +50,7 @@ public class FrontendDataHandler extends DataHandler {
                 case LOGIN_SUCCESS:
                     System.out.println("Login successful!");
                     //todo - progress the game to character selection, probably.
-                    //todo - use the transmitted user account for this
+                    UserAccount.activeSession = lirid.USER_ACCOUNT;
                     break;
                     default:
                         throw new IllegalStateException("Unhandled response code: " + lirid.RESPONSE_CODE);

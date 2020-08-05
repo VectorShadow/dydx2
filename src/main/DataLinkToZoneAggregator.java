@@ -107,11 +107,13 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
             //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
             dataLink.transmit(new GameZoneInstructionDatum(gz));
             addZoneProcessor(dataLink, gz, zc);
+            zs = dls.zoneSession;
         } else {
             //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
             dataLink.transmit(new GameZoneInstructionDatum(dls.zoneSession.getGameZone()));
             connect(dataLink, zc);
         }
+        zs.getGameZone().addActor(userAvatar.getActor());
         LiveLog.log("Connected user " + ua.getName() + " to GameZone at " + zc, INFO);
     }
 
