@@ -78,21 +78,30 @@ public class GameZone extends TransmittableGameAsset {
         PROJECTILE_MAP = Collections.synchronizedMap(new HashMap<Integer, GameProjectile>());
     }
 
-    public void addActor(GameActor actor) {
+    /**
+     * @Apply() Method:
+     * Add the specified actor to this game zone.
+     */
+    void addActor(GameActor actor) {
         //todo - check this terrain tile to see if it can fit an actor here!
         // does that check go here and throw an exception? or at whatever calls this?
         actor.setGameZone(this);
         ACTOR_MAP.put(actor.getSerialID(), actor);
         ACTOR_LIST.add(actor);
         PointCoordinate pc = actor.getAt();
-        if (pc == null) {
+        if (pc == null) { //todo - MEGAHACK - actor must have a position *before* calling add on it, unless placeActor is implemented completely deterministically(backend vs frontend must have the same outcome)
             placeActor(actor); //todo - this method is currently a hack, fix it
             pc = actor.getAt();
         }
         Coordinate c = pc.getParentTileCoordinate();
         TERRAIN[c.ROW][c.COLUMN].actorList.add(actor);
     }
-    public void addProjectile(GameProjectile projectile) {
+
+    /**
+     * @Apply() Method:
+     * Add the specified projectile to this game zone.
+     */
+    void addProjectile(GameProjectile projectile) {
         PROJECTILE_MAP.put(projectile.getSerialID(), projectile);
         PROJECTILE_LIST.add(projectile);
         Coordinate c = projectile.getAt().getParentTileCoordinate();
@@ -128,17 +137,19 @@ public class GameZone extends TransmittableGameAsset {
     }
 
     /**
+     * @Apply() Method:
      * Move the specified actor to the specified destination point.
      * If it is not found in its source terrain tile's tracker, throw an illegal state exception.
      */
-    public void moveActor(Integer serialID, PointCoordinate pc) {
+    void moveActor(Integer serialID, PointCoordinate pc) {
         moveMobileGameObject(lookupActor(serialID), pc);
     }
     /**
+     * @Apply() Method:
      * Move the specified projectile to the specified destination point.
      * If it is not found in its source terrain tile's tracker, throw an illegal state exception.
      */
-    public void moveProjectile(Integer serialID, PointCoordinate pc) {
+    void moveProjectile(Integer serialID, PointCoordinate pc) {
         moveMobileGameObject(lookupProjectile(serialID), pc);
     }
     private void moveMobileGameObject(MobileGameObject mgo, PointCoordinate pc) {
@@ -171,26 +182,28 @@ public class GameZone extends TransmittableGameAsset {
     }
 
     /**
+     * @Apply() Method:
      * Remove the specified actor from this gamezone, by first removing it from the tracker of the tile it
      * is in, then from the actor list, and finally from the actor map.
      * If it is not found in any of these places, throw an illegal state exception.
      */
-    public void removeActor(Integer serialID) {
+    void removeActor(Integer serialID) {
         GameActor ga = lookupActor(serialID);
         if (!(tileAt(ga.getAt().getParentTileCoordinate()).actorList.remove(ga)))
             throw new IllegalStateException("Removed actor not found within its tile tracker.");
         if (!(ACTOR_LIST.remove(ga)))
             throw new IllegalStateException("Removed actor not found within the zone's actor list.");
-        if (ACTOR_MAP.remove(ga) == null)
+        if (ACTOR_MAP.remove(serialID) == null)
             throw new IllegalStateException("Removed actor not found within the zone's actor map.");
     }
 
     /**
+     * @Apply() Method:
      * Remove the specified projectile from this gamezone, by first removing it from the tracker of the tile it
      * is in, then from the projectile list, and finally from the projectile map.
      * If it is not found in any of these places, throw an illegal state exception.
      */
-    public void removeProjectile(Integer serialID) {
+    void removeProjectile(Integer serialID) {
         GameProjectile gp = lookupProjectile(serialID);
         //indirect projectiles are not tracked my terrain tiles
         if (gp.isDirect() && !(tileAt(gp.getAt().getParentTileCoordinate()).actorList.remove(gp)))
@@ -201,12 +214,21 @@ public class GameZone extends TransmittableGameAsset {
             throw new IllegalStateException("Removed actor not found within the zone's actor map.");
     }
 
-    public void rotateActor(Integer serialID, Double facingChange) {
+    /**
+     * @Apply() Method:
+     * Rotate the actor by the specified amount.
+     */
+    void rotateActor(Integer serialID, Double facingChange) {
         GameActor ga = lookupActor(serialID);
         rotateMobileGameObject(ga, facingChange);
     }
 
-    public void rotateProjectile(Integer serialID, Double facingChange) {
+
+    /**
+     * @Apply() Method:
+     * Rotate the projectile by the specified amount.
+     */
+    void rotateProjectile(Integer serialID, Double facingChange) {
         GameProjectile gp = lookupProjectile(serialID);
         rotateMobileGameObject(gp, facingChange);
     }
@@ -214,8 +236,6 @@ public class GameZone extends TransmittableGameAsset {
     private void rotateMobileGameObject(MobileGameObject mgo, Double facingChange) {
         mgo.rotate(facingChange);
     }
-
-
 
     public TerrainTile tileAt(Coordinate tc) {
         return tileAt(tc.COLUMN, tc.ROW);
@@ -236,12 +256,12 @@ public class GameZone extends TransmittableGameAsset {
 
     public void apply(GameZoneUpdate update) {
         try {
-            update.toMethod().invoke(this, update.ARGUMENTS);
+            update.invoke(this);
             ++checkSum;
         } catch (IllegalAccessException e) {
             LogHub.logFatalCrash("Update failure - IllegalAccessException", e);
         } catch (InvocationTargetException e) {
-            LogHub.logFatalCrash("Update failure - InvocationTargetException", e);
+            LogHub.logFatalCrash("Update failure - InvocationTargetException", (Exception) e.getCause());
         } catch (NoSuchMethodException e) {
             LogHub.logFatalCrash("Update failure - NoSuchMethodException", e);
         }

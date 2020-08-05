@@ -27,7 +27,7 @@ public class ProjectileMovementEvent extends Event {
             updateList.add(
                     new GameZoneUpdate(
                             "moveProjectile",
-                            PROJECTILE,
+                            PROJECTILE.getSerialID(),
                             Pathfinder.travel(PROJECTILE, true)
                     )
             );
@@ -39,7 +39,7 @@ public class ProjectileMovementEvent extends Event {
             updateList.add(
                     new GameZoneUpdate(
                             "removeProjectile",
-                            PROJECTILE
+                            PROJECTILE.getSerialID()
                     )
             );
         }

@@ -24,7 +24,7 @@ public class ProjectileRotationEvent extends Event {
         updateList.add(
                 new GameZoneUpdate(
                         "rotateProjectile",
-                        PROJECTILE,
+                        PROJECTILE.getSerialID(),
                         CLOCKWISE ? 0 - PROJECTILE.getTurningSpeed() : PROJECTILE.getTurningSpeed()
                 )
         );

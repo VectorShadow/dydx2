@@ -24,7 +24,7 @@ public class ActorRotationEvent extends Event {
         updateList.add(
                 new GameZoneUpdate(
                         "rotateActor",
-                        ACTOR,
+                        ACTOR.getSerialID(),
                         CLOCKWISE ? 0 - ACTOR.getTurningSpeed() : ACTOR.getTurningSpeed()
                 )
         );

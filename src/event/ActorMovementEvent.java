@@ -23,7 +23,7 @@ public class ActorMovementEvent extends Event {
         updateList.add(
                 new GameZoneUpdate(
                         "moveActor",
-                        ACTOR,
+                        ACTOR.getSerialID(),
                         Pathfinder.travel(ACTOR, FORWARD)
                 )
         );

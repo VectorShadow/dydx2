@@ -49,6 +49,7 @@ public class ZoneSession {
                 //collect all updates for transmission, then apply them to this processor's GameZone
                 for (GameZoneUpdate gzu : eventUpdates) {
                     turnUpdates.add(gzu);
+                    LiveLog.log("Applying game zone update on back end...", LiveLog.LogEntryPriority.INFO);
                     GAME_ZONE.apply(gzu);
                 }
             }

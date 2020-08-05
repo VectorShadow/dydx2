@@ -8,7 +8,7 @@ import gamestate.terrain.TerrainProperties;
  */
 public abstract class GameProjectile extends MobileGameObject {
 
-    private static int serialCount = 0;
+    private static int serialCount = 1;
 
     /**
      * Specifies whether this projectile travels in a direct trajectory, or in an indirect arc over the top

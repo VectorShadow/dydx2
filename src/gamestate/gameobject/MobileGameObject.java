@@ -79,7 +79,7 @@ public abstract class MobileGameObject extends SerialGameObject {
      * Set the facing of the mobile game object.
      */
     private void setFacing(double facing) {
-        if (facing > 2 * Math.PI)
+        if (facing >= 2 * Math.PI)
             this.facing = facing - (2 * Math.PI);
         else if (facing < 0)
             this.facing = facing + (2 * Math.PI);

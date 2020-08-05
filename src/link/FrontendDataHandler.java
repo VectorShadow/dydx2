@@ -8,6 +8,7 @@ import main.LogHub;
 import user.UserAccount;
 
 import static link.instructions.LogInResponseInstructionDatum.*;
+import static main.LiveLog.LogEntryPriority.*;
 
 public class FrontendDataHandler extends DataHandler {
     @Override
@@ -23,12 +24,16 @@ public class FrontendDataHandler extends DataHandler {
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
         if (instructionDatum instanceof GameZoneInstructionDatum) {
             GameZone.frontEnd = ((GameZoneInstructionDatum)instructionDatum).GAME_ZONE;
+            LiveLog.log("Loaded new gameZone on frontend.", ALERT);
         } else if (instructionDatum instanceof GameZoneUpdateInstructionDatum) {
+            LiveLog.log("Applying game zone update on front end...", INFO);
             GameZoneUpdateInstructionDatum gzuid = ((GameZoneUpdateInstructionDatum) instructionDatum);
             for (GameZoneUpdate gzu : gzuid.UPDATE_LIST)
                 GameZone.frontEnd.apply(gzu);
-            if (GameZone.frontEnd.getCheckSum() != gzuid.UPDATE_CHECKSUM)
+            if (GameZone.frontEnd.getCheckSum() != gzuid.UPDATE_CHECKSUM) {
                 responseLink.transmit(new ReportChecksumMismatchInstructionDatum());
+                LiveLog.log("Checksum validation failed! Requesting updated game zone.", WARNING);
+            }
         } else if (instructionDatum instanceof LogInResponseInstructionDatum) {
             LogInResponseInstructionDatum lirid = (LogInResponseInstructionDatum)instructionDatum;
             switch (lirid.RESPONSE_CODE) {

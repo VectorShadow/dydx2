@@ -158,9 +158,10 @@ public class Engine extends Thread {
     }
 
     /**
-     * On logout or disconnect: stop tracking the user account and purge the link.
+     * On logout or disconnect: stop tracking the user avatar, then the account, and purge the link.
      */
     public void disconnectDataLink(DataLink dataLink) {
+        disconnectUserAvatar(dataLink);
         LINK_TO_ZONE_AGGREGATOR.purgeExpiredDataLinkSession(dataLink);
     }
 

@@ -6,7 +6,7 @@ package gamestate.gameobject;
  */
 public abstract class GameActor extends MobileGameObject {
 
-    private static int serialCount = 0;
+    private static int serialCount = 1;
 
     @Override
     public boolean isMaterial() {

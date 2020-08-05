@@ -3,8 +3,10 @@ package main;
 import definitions.DefinitionsManager;
 import gamestate.gamezone.GameZone;
 import gamestate.coordinates.ZoneCoordinate;
+import gamestate.gamezone.GameZoneUpdate;
 import link.DataLink;
 import link.instructions.GameZoneInstructionDatum;
+import link.instructions.GameZoneUpdateInstructionDatum;
 import user.UserAccount;
 import user.UserAvatar;
 
@@ -57,7 +59,8 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
      */
     private void connect(DataLink dl, ZoneCoordinate zc) {
         DataLinkSession dls = get(dl);
-        dls.zoneSession.LINKS.remove(dls);
+        if (dls.zoneSession != null)
+            dls.zoneSession.LINKS.remove(dls);
         ZoneSession zs = get(zc);
         dls.zoneSession = zs;
         zs.LINKS.add(dls);
@@ -102,18 +105,31 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         ua.setCurrentAvatar(userAvatar);
         ZoneCoordinate zc = userAvatar.getAt();
         ZoneSession zs = get(zc);
+        GameZone gz;
         if (zs == null) {
-            GameZone gz = DefinitionsManager.generateZone(zc);
+            gz = DefinitionsManager.generateZone(zc);
             //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
             dataLink.transmit(new GameZoneInstructionDatum(gz));
             addZoneProcessor(dataLink, gz, zc);
-            zs = dls.zoneSession;
         } else {
             //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
-            dataLink.transmit(new GameZoneInstructionDatum(dls.zoneSession.getGameZone()));
+            gz = zs.getGameZone();
+            dataLink.transmit(new GameZoneInstructionDatum(gz));
             connect(dataLink, zc);
         }
-        zs.getGameZone().addActor(userAvatar.getActor());
+        GameZoneUpdate addActor = new GameZoneUpdate(
+                "addActor",
+                userAvatar.getActor()
+        );
+        gz.apply(addActor);
+        ArrayList<GameZoneUpdate> addActorAsList = new ArrayList<>();
+        addActorAsList.add(addActor);
+        dataLink.transmit(
+                new GameZoneUpdateInstructionDatum(
+                        gz.getCheckSum(),
+                        addActorAsList
+                )
+        );
         LiveLog.log("Connected user " + ua.getName() + " to GameZone at " + zc, INFO);
     }
 
@@ -122,7 +138,14 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
      */
     void disconnectLinkFromZone(DataLink dataLink) {
         DataLinkSession dls = get(dataLink);
+        if (dls.zoneSession == null) return; //no need to continue if this link never connected to a zone session
         dls.zoneSession.LINKS.remove(dls);
+        dls.zoneSession.getGameZone().apply( //remove the player's actor from the game zone
+                new GameZoneUpdate(
+                        "removeActor",
+                        dls.userAccount.getCurrentAvatar().getActor().getSerialID()
+                )
+        ); //no need to transmit this update since the link is being disconnected
         dls.zoneSession = null;
     }
 
