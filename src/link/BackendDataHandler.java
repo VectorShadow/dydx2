@@ -1,5 +1,6 @@
 package link;
 
+import definitions.DefinitionsManager;
 import link.instructions.*;
 import main.Engine;
 import main.LiveLog;
@@ -13,6 +14,8 @@ import static user.UserAccountManager.*;
 public class BackendDataHandler extends DataHandler {
     @Override
     protected void connectionLost(DataLink dataLink) {
+        //todo - better handling here - wait a certain time for reconnection.
+        // Also call the OrderExecutor's disconnect method on this link to handle orders.
         dataLink.terminate(); //stop thread execution
         if (dataLink instanceof LocalDataLink)
             LogHub.logFatalCrash("Local connection lost", new IllegalStateException());
@@ -80,6 +83,12 @@ public class BackendDataHandler extends DataHandler {
             LogOutInstructionDatum lorid = (LogOutInstructionDatum)instructionDatum;
             LiveLog.log("User \"" + lorid.USERNAME + "\" requested logout.", LiveLog.LogEntryPriority.INFO);
             Engine.getInstance().disconnectDataLink(responseLink); //instruct the engine to properly remove the link
+        } else if (instructionDatum instanceof OrderTransmissionInstructionDatum){
+            OrderTransmissionInstructionDatum otid = (OrderTransmissionInstructionDatum)instructionDatum;
+            if (otid.ORDER == null)
+                DefinitionsManager.executeOrder().clearOrder(responseLink, otid.ORDER_CLASS);
+            else
+                DefinitionsManager.executeOrder().setOrder(responseLink, otid.ORDER);
         } else if (instructionDatum instanceof ReportChecksumMismatchInstructionDatum) {
             responseLink.transmit(new GameZoneInstructionDatum(Engine.getInstance().getGameZone(responseLink)));
         } else if (instructionDatum instanceof SelectAvatarInstructionData) {

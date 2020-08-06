@@ -8,11 +8,17 @@ import gamestate.coordinates.ZoneCoordinate;
  */
 public class DefinitionsManager {
     private static GameZoneGenerator gameZoneGenerator = null;
+    private static OrderExecutor orderExecutor = null;
     private static TerrainLookup terrainLookup = null;
 
-    public static void loadDefinitions(GameZoneGenerator gzg, TerrainLookup tl) {
+    public static void loadDefinitions(GameZoneGenerator gzg, OrderExecutor oe, TerrainLookup tl) {
         gameZoneGenerator = gzg;
+        orderExecutor = oe;
         terrainLookup = tl;
+    }
+
+    public static OrderExecutor executeOrder() {
+        return orderExecutor;
     }
 
     public static GameZone generateZone(ZoneCoordinate zc) {

@@ -185,4 +185,11 @@ public class Engine extends Thread {
     public GameZone getGameZone(DataLink dataLink) {
         return LINK_TO_ZONE_AGGREGATOR.get(dataLink).zoneSession.getGameZone();
     }
+
+    /**
+     * Access the user account connected on the specified data link.
+     */
+    public UserAccount getUserAccount(DataLink dataLink) {
+        return LINK_TO_ZONE_AGGREGATOR.get(dataLink).userAccount;
+    }
 }

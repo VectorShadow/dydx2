@@ -24,15 +24,14 @@ public class FrontendDataHandler extends DataHandler {
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
         if (instructionDatum instanceof GameZoneInstructionDatum) {
             GameZone.frontEnd = ((GameZoneInstructionDatum)instructionDatum).GAME_ZONE;
-            LiveLog.log("Loaded new gameZone on frontend.", ALERT);
+            LiveLog.log("Loaded new gameZone on frontend.", INFO);
         } else if (instructionDatum instanceof GameZoneUpdateInstructionDatum) {
-            LiveLog.log("Applying game zone update on front end...", INFO);
             GameZoneUpdateInstructionDatum gzuid = ((GameZoneUpdateInstructionDatum) instructionDatum);
             for (GameZoneUpdate gzu : gzuid.UPDATE_LIST)
                 GameZone.frontEnd.apply(gzu);
             if (GameZone.frontEnd.getCheckSum() != gzuid.UPDATE_CHECKSUM) {
                 responseLink.transmit(new ReportChecksumMismatchInstructionDatum());
-                LiveLog.log("Checksum validation failed! Requesting updated game zone.", WARNING);
+                LiveLog.log("Game update checksum validation failed! Requesting updated game zone.", WARNING);
             }
         } else if (instructionDatum instanceof LogInResponseInstructionDatum) {
             LogInResponseInstructionDatum lirid = (LogInResponseInstructionDatum)instructionDatum;

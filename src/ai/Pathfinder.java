@@ -79,7 +79,9 @@ public class Pathfinder {
                         speed,
                         forward ?
                                 direction
-                                : (Math.PI * 2) - direction
+                                : direction > Math.PI ?
+                                direction - Math.PI
+                                : Math.PI - direction
                 );
         PointCoordinate pathPoint;
         TerrainTile terrainTile;
