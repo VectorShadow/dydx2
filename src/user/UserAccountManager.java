@@ -23,6 +23,12 @@ public class UserAccountManager {
     public static final int SALT = 1;
     public static final int HASHED_PASSWORD = 2;
 
+    /**
+     * This is the user account presented to the front end.
+     * The FrontEndDataHandler will keep this updated.
+     * The implementation will need access to it to track the player's current state.
+     */
+    public static UserAccount activeSession = null;
 
     /**
      * Query the user catalog for the specified username.

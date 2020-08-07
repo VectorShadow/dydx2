@@ -6,6 +6,8 @@ import gamestate.order.Order;
 import gamestate.order.RotationOrder;
 import link.DataLink;
 import main.Engine;
+import user.UserAccount;
+import user.UserAccountManager;
 
 /**
  * Handles order setting and clearing for the engine to implementation specifications.
@@ -13,15 +15,27 @@ import main.Engine;
 public abstract class OrderExecutor {
 
     /**
-     * Handle a disconnection.
+     * Handle a disconnection for the back end.
      * First we stop any active movement and rotation orders, then we pass the actor on to implementation specific
      * handling.
      * @param dataLink the datalink on which the disconnection occurred.
      */
-    public void handleDisconnection(DataLink dataLink) {
+    public void backEndHandleDisconnection(DataLink dataLink) {
         clearOrder(dataLink, MovementOrder.class);
         clearOrder(dataLink, RotationOrder.class);
         implementationHandleDisconnection(getActor(dataLink));
+    }
+
+    /**
+     * Handle a disconnection for the front end.
+     * This proceeds exactly as the back end method, since the result must be that back end and front end actor states
+     * remain synchronized.
+     */
+    public void frontEndHandleDisconnection() {
+        GameActor userActor = UserAccountManager.activeSession.getCurrentAvatar().getActor();
+        userActor.setMovementOrder(null);
+        userActor.setRotationOrder(null);
+        implementationHandleDisconnection(userActor);
     }
 
     protected abstract void implementationHandleDisconnection(GameActor actor);

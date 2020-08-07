@@ -39,12 +39,30 @@ public abstract class GameActor extends MobileGameObject {
         return events;
     }
 
-    public void setMovementOrder(MovementOrder movementOrder) {
-        this.movementOrder = movementOrder;
+    /**
+     * Return whether this method changed the current order.
+     */
+    public boolean setMovementOrder(MovementOrder mo) {
+        if (
+                (movementOrder == null && mo == null) ||
+                        movementOrder != null && movementOrder.equals(mo)
+        )
+            return false;
+        movementOrder = mo;
+        return true;
     }
 
-    public void setRotationOrder(RotationOrder rotationOrder) {
-        this.rotationOrder = rotationOrder;
+    /**
+     * Return whether this method changed the current order.
+     */
+    public boolean setRotationOrder(RotationOrder ro) {
+        if (
+                (rotationOrder == null && ro == null) ||
+                        rotationOrder != null && rotationOrder.equals(ro)
+        )
+            return false;
+        rotationOrder = ro;
+        return true;
     }
 
 }

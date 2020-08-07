@@ -15,7 +15,7 @@ public class BackendDataHandler extends DataHandler {
     @Override
     protected void connectionLost(DataLink dataLink) {
         //todo - better handling here - wait a certain time for reconnection.
-        // Also call the OrderExecutor's disconnect method on this link to handle orders.
+        DefinitionsManager.executeOrder().backEndHandleDisconnection(dataLink); //currently redundant since we purge the link, but should be maintained once we handle disconnection more appropriately
         dataLink.terminate(); //stop thread execution
         if (dataLink instanceof LocalDataLink)
             LogHub.logFatalCrash("Local connection lost", new IllegalStateException());

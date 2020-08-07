@@ -5,4 +5,6 @@ import gamestate.TransmittableGameAsset;
 /**
  * AI or user input driven commands to drive actor event scheduling.
  */
-public abstract class Order extends TransmittableGameAsset {}
+public abstract class Order extends TransmittableGameAsset {
+    public abstract boolean equals(Order order);
+}

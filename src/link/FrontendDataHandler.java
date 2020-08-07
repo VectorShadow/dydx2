@@ -1,11 +1,12 @@
 package link;
 
+import definitions.DefinitionsManager;
 import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
 import link.instructions.*;
 import main.LiveLog;
 import main.LogHub;
-import user.UserAccount;
+import user.UserAccountManager;
 
 import static link.instructions.LogInResponseInstructionDatum.*;
 import static main.LiveLog.LogEntryPriority.*;
@@ -17,6 +18,7 @@ public class FrontendDataHandler extends DataHandler {
             LogHub.logFatalCrash("Local connection lost", new IllegalStateException());
         LiveLog.log("Lost connection to remote server.", LiveLog.LogEntryPriority.WARNING);
         //todo - try to re-establish? for now, close the program.
+        DefinitionsManager.executeOrder().frontEndHandleDisconnection(); //currently redundant since we exit the program, but should be maintained once we handle disconnection more appropriately
         System.exit(-3);
     }
 
@@ -54,7 +56,7 @@ public class FrontendDataHandler extends DataHandler {
                 case LOGIN_SUCCESS:
                     System.out.println("Login successful!");
                     //todo - progress the game to character selection, probably.
-                    UserAccount.activeSession = lirid.USER_ACCOUNT;
+                    UserAccountManager.activeSession = lirid.USER_ACCOUNT;
                     break;
                     default:
                         throw new IllegalStateException("Unhandled response code: " + lirid.RESPONSE_CODE);

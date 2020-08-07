@@ -12,13 +12,6 @@ import static user.UserAccountManager.*;
  */
 public class UserAccount implements Serializable {
 
-    /**
-     * This is the user account presented to the front end.
-     * The FrontEndDataHandler will keep this updated.
-     * The implementation will need access to it to track the player's current state.
-     */
-    public static UserAccount activeSession = null;
-
     public static final int MAX_AVATAR_COUNT = 4; //arbitrary - this may change later
 
     private final String NAME;
