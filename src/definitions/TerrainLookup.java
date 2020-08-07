@@ -21,6 +21,10 @@ public abstract class TerrainLookup {
                 : (getEnergyPermission(tt) > 0);
     }
 
+    public TerrainProperties getProperties(TerrainTile tt) {
+        return lookup(tt.ID);
+    }
+
     private int getEnergyPermission(TerrainTile tt) {
         return lookup(tt.ID).ENERGY_PERMISSION;
     }

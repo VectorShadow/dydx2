@@ -8,24 +8,35 @@ import gamestate.coordinates.ZoneCoordinate;
  */
 public class DefinitionsManager {
     private static GameZoneGenerator gameZoneGenerator = null;
+    private static GameZoneUpdateListener gameZoneUpdateListener = null;
     private static OrderExecutor orderExecutor = null;
     private static TerrainLookup terrainLookup = null;
 
-    public static void loadDefinitions(GameZoneGenerator gzg, OrderExecutor oe, TerrainLookup tl) {
+    public static void loadDefinitions(
+            GameZoneGenerator gzg,
+            GameZoneUpdateListener gzul,
+            OrderExecutor oe,
+            TerrainLookup tl
+    ) {
         gameZoneGenerator = gzg;
+        gameZoneUpdateListener = gzul;
         orderExecutor = oe;
         terrainLookup = tl;
-    }
-
-    public static OrderExecutor executeOrder() {
-        return orderExecutor;
     }
 
     public static GameZone generateZone(ZoneCoordinate zc) {
         return gameZoneGenerator.getGameZoneBuilder(zc).build();
     }
 
-    public static TerrainLookup lookupTerrain() {
+    public static GameZoneUpdateListener getGameZoneUpdateListener() {
+        return gameZoneUpdateListener;
+    }
+
+    public static OrderExecutor getOrderExecutor() {
+        return orderExecutor;
+    }
+
+    public static TerrainLookup getTerrainLookup() {
         return terrainLookup;
     }
 }

@@ -8,6 +8,7 @@ import gamestate.gameobject.GameProjectile;
 import gamestate.gameobject.MobileGameObject;
 import gamestate.terrain.TerrainTile;
 import main.LogHub;
+import user.UserAccountManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -83,6 +84,11 @@ public class GameZone extends TransmittableGameAsset {
      * Add the specified actor to this game zone.
      */
     void addActor(GameActor actor) {
+        //hack - ensure our session actor points to the added actor when the frontend adds it due to an add actor
+        // update instruction. This is a terrible way of doing this! todo - refactor with a proper solution
+        if (UserAccountManager.activeSession != null &&
+                UserAccountManager.activeSession.getCurrentAvatar().getActor().getSerialID() == actor.getSerialID())
+            UserAccountManager.activeSession.getCurrentAvatar().setActor(actor);
         //todo - check this terrain tile to see if it can fit an actor here!
         // does that check go here and throw an exception? or at whatever calls this?
         actor.setGameZone(this);
@@ -106,6 +112,14 @@ public class GameZone extends TransmittableGameAsset {
         PROJECTILE_LIST.add(projectile);
         Coordinate c = projectile.getAt().getParentTileCoordinate();
         TERRAIN[c.ROW][c.COLUMN].projectileList.add(projectile);
+    }
+
+    public int countColumns() {
+        return COLUMNS;
+    }
+
+    public int countRows() {
+        return ROWS;
     }
 
     private GameActor lookupActor(Integer serialID) {

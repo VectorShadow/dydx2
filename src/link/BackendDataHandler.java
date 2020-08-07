@@ -15,7 +15,7 @@ public class BackendDataHandler extends DataHandler {
     @Override
     protected void connectionLost(DataLink dataLink) {
         //todo - better handling here - wait a certain time for reconnection.
-        DefinitionsManager.executeOrder().backEndHandleDisconnection(dataLink); //currently redundant since we purge the link, but should be maintained once we handle disconnection more appropriately
+        DefinitionsManager.getOrderExecutor().backEndHandleDisconnection(dataLink); //currently redundant since we purge the link, but should be maintained once we handle disconnection more appropriately
         dataLink.terminate(); //stop thread execution
         if (dataLink instanceof LocalDataLink)
             LogHub.logFatalCrash("Local connection lost", new IllegalStateException());
@@ -86,9 +86,9 @@ public class BackendDataHandler extends DataHandler {
         } else if (instructionDatum instanceof OrderTransmissionInstructionDatum){
             OrderTransmissionInstructionDatum otid = (OrderTransmissionInstructionDatum)instructionDatum;
             if (otid.ORDER == null)
-                DefinitionsManager.executeOrder().clearOrder(responseLink, otid.ORDER_CLASS);
+                DefinitionsManager.getOrderExecutor().clearOrder(responseLink, otid.ORDER_CLASS);
             else
-                DefinitionsManager.executeOrder().setOrder(responseLink, otid.ORDER);
+                DefinitionsManager.getOrderExecutor().setOrder(responseLink, otid.ORDER);
         } else if (instructionDatum instanceof ReportChecksumMismatchInstructionDatum) {
             responseLink.transmit(new GameZoneInstructionDatum(Engine.getInstance().getGameZone(responseLink)));
         } else if (instructionDatum instanceof SelectAvatarInstructionData) {

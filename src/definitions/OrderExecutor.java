@@ -8,6 +8,7 @@ import link.DataLink;
 import main.Engine;
 import user.UserAccount;
 import user.UserAccountManager;
+import user.UserAvatar;
 
 /**
  * Handles order setting and clearing for the engine to implementation specifications.
@@ -32,7 +33,10 @@ public abstract class OrderExecutor {
      * remain synchronized.
      */
     public void frontEndHandleDisconnection() {
-        GameActor userActor = UserAccountManager.activeSession.getCurrentAvatar().getActor();
+        if (UserAccountManager.activeSession == null) return; //nothing to do if no session has begun
+        UserAvatar userAvatar = UserAccountManager.activeSession.getCurrentAvatar();
+        if (userAvatar == null) return; //nothing to do if a session exists but no avatar has been selected yet
+        GameActor userActor = userAvatar.getActor();
         userActor.setMovementOrder(null);
         userActor.setRotationOrder(null);
         implementationHandleDisconnection(userActor);
