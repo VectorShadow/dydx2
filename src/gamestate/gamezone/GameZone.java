@@ -83,9 +83,12 @@ public class GameZone extends TransmittableGameAsset {
      * @Apply() Method:
      * Add the specified actor to this game zone.
      */
+    /*
+     * When an actor is generated for placement, its coordinates should be set by the placement method. Use that method
+     * to validate pre-existing player coordinates(and reset them if necessary).
+     */
     void addActor(GameActor actor) {
-        //hack - ensure our session actor points to the added actor when the frontend adds it due to an add actor
-        // update instruction. This is a terrible way of doing this! todo - refactor with a proper solution
+        //ensure the frontend session actor continues pointing to the proper actor added by the engine:
         if (UserAccountManager.activeSession != null &&
                 UserAccountManager.activeSession.getCurrentAvatar().getActor().getSerialID() == actor.getSerialID())
             UserAccountManager.activeSession.getCurrentAvatar().setActor(actor);
