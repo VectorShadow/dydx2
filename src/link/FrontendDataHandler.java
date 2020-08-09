@@ -1,6 +1,7 @@
 package link;
 
 import definitions.DefinitionsManager;
+import gamestate.gameobject.GameActor;
 import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
 import link.instructions.*;
@@ -61,6 +62,26 @@ public class FrontendDataHandler extends DataHandler {
             }
         } else if (instructionDatum instanceof LogOutInstructionDatum) {
             System.exit(0); //proper logout
+        } else if (instructionDatum instanceof SelectAvatarInstructionData) {
+            /*
+             * update the front end session with a user avatar that's had it's current actor created by the engine
+             * so that its SerialID synchs with the actor added to the GameZone
+             */
+            UserAccountManager.
+                    activeSession.
+                    getCurrentAvatar()
+                    .setActor(
+                            (GameActor)
+                            GameZone.
+                                    frontEnd.
+                                    getActorMap().
+                                    get(
+                                            ((SelectAvatarInstructionData)instructionDatum).
+                                                    USER_AVATAR.
+                                                    getActor().
+                                                    getSerialID()
+                                    )
+                    );
         } else {
                 //todo - more cases
                 throw new IllegalArgumentException("Unhandled InstructionDatum class: " + instructionDatum.getClass());

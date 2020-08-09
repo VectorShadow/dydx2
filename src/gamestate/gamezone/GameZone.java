@@ -87,11 +87,8 @@ public class GameZone extends TransmittableGameAsset {
      * When an actor is generated for placement, its coordinates should be set by the placement method. Use that method
      * to validate pre-existing player coordinates(and reset them if necessary).
      */
+    //todo - update to reflect avatar constructActor method.
     void addActor(GameActor actor) {
-        //ensure the frontend session actor continues pointing to the proper actor added by the engine:
-        if (UserAccountManager.activeSession != null &&
-                UserAccountManager.activeSession.getCurrentAvatar().getActor().getSerialID() == actor.getSerialID())
-            UserAccountManager.activeSession.getCurrentAvatar().setActor(actor);
         //todo - check this terrain tile to see if it can fit an actor here!
         // does that check go here and throw an exception? or at whatever calls this?
         actor.setGameZone(this);
@@ -282,8 +279,12 @@ public class GameZone extends TransmittableGameAsset {
         } catch (NoSuchMethodException e) {
             LogHub.logFatalCrash("Update failure - NoSuchMethodException", e);
         }
-        //test
-        if (update.METHOD_NAME.equals("moveActor"))
-            System.out.println("Player actor is now at " + ACTOR_LIST.get(0).getAt() + " facing " + ACTOR_LIST.get(0).getFacing());
+//        //test
+//        invariant();
+//        if (update.METHOD_NAME.equals("moveActor")) {
+//            System.out.println("Moved an actor - now:");
+//            for (GameActor ga : ACTOR_LIST)
+//                System.out.println("Actor with ID " + ga.getSerialID() + " is at " + ga.getAt() + " facing " + ga.getFacing());
+//        }
     }
 }

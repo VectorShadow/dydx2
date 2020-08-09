@@ -26,6 +26,14 @@ public abstract class SerialGameObject extends GameObject {
     protected abstract int nextSerialID();
 
     /**
+     * SerialGameObjects are equal if they are of the same class and have the same ID.
+     */
+    @Override
+    public boolean equals(Object o) {
+        return getClass().equals(o.getClass()) && serialID == ((SerialGameObject)o).serialID;
+    }
+
+    /**
      * Since serial game objects within a Zone are usually generated in quick succession, when the Zone is created,
      * a modulus based hash function provides the fewest collisions. As the number of objects grow beyond the value of
      * HASH_CONSTANT, or in situations where actors are added piecemeal after initial spawn, there may be more,

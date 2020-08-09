@@ -62,6 +62,7 @@ public class BackendDataHandler extends DataHandler {
                             )
                     );
                 } else if (!catalogFields[HASHED_PASSWORD].equals(lirid.getHashedPassword(catalogFields[SALT]))) {
+                    System.out.println(catalogFields[HASHED_PASSWORD] + "\n was not equal to " + lirid.getHashedPassword(catalogFields[SALT]));
                     responseLink.transmit(
                             new LogInResponseInstructionDatum(
                                     LOGIN_FAILURE_INCORRECT_PASSWORD,
@@ -96,6 +97,11 @@ public class BackendDataHandler extends DataHandler {
             Engine.getInstance().connectUserAvatar(
                     responseLink,
                     ((SelectAvatarInstructionData)instructionDatum).USER_AVATAR
+            );
+            responseLink.transmit( //re-transmit the avatar back to the sender with its new Actor set.
+                    new SelectAvatarInstructionData(
+                            Engine.getInstance().getUserAccount(responseLink).getCurrentAvatar()
+                    )
             );
         }
     }

@@ -5,6 +5,7 @@ import gamestate.gamezone.GameZone;
 import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gamezone.GameZoneUpdate;
 import link.DataLink;
+import link.RemoteDataLink;
 import link.instructions.GameZoneInstructionDatum;
 import link.instructions.GameZoneUpdateInstructionDatum;
 import user.UserAccount;
@@ -119,7 +120,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         }
         GameZoneUpdate addActor = new GameZoneUpdate(
                 "addActor",
-                userAvatar.getActor()
+                userAvatar.constructActor() //engine side actor creation
         );
         gz.apply(addActor);
         ArrayList<GameZoneUpdate> addActorAsList = new ArrayList<>();
@@ -204,6 +205,13 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         if (linkConnectionCount != zoneConnectionCount)
             throw new IllegalStateException("Invariant failure - link connections: " + linkConnectionCount +
                     " zone connections: " + zoneConnectionCount);
+        for (DataLinkSession dls1 : dataLinkSessions) {
+            for (DataLinkSession dls2 : dataLinkSessions) {
+                if (dls1 != dls2)
+                    if (((RemoteDataLink)dls1.LINK).getSocket().getLocalPort() == ((RemoteDataLink)dls2.LINK).getSocket().getLocalPort())
+                        throw new IllegalStateException("Invariant failure - sockets from different links connected on the same port!");
+            }
+        }
     }
 
     /**
