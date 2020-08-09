@@ -9,17 +9,20 @@ import gamestate.coordinates.ZoneCoordinate;
 public class DefinitionsManager {
     private static GameZoneGenerator gameZoneGenerator = null;
     private static GameZoneUpdateListener gameZoneUpdateListener = null;
+    private static LoginResponseHandler loginResponseHandler = null;
     private static OrderExecutor orderExecutor = null;
     private static TerrainLookup terrainLookup = null;
 
     public static void loadDefinitions(
             GameZoneGenerator gzg,
             GameZoneUpdateListener gzul,
+            LoginResponseHandler lrh,
             OrderExecutor oe,
             TerrainLookup tl
     ) {
         gameZoneGenerator = gzg;
         gameZoneUpdateListener = gzul;
+        loginResponseHandler = lrh;
         orderExecutor = oe;
         terrainLookup = tl;
     }
@@ -30,6 +33,10 @@ public class DefinitionsManager {
 
     public static GameZoneUpdateListener getGameZoneUpdateListener() {
         return gameZoneUpdateListener;
+    }
+
+    public static LoginResponseHandler getLoginResponseHandler() {
+        return loginResponseHandler;
     }
 
     public static OrderExecutor getOrderExecutor() {

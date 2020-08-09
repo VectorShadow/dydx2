@@ -61,7 +61,7 @@ public class UserAccountManager {
          */
         if (queryUsername(username) != null)
             return null;
-        String catalogLine = username + FIELD_SEPARATOR + salt + FIELD_SEPARATOR + hashedPassword;
+        String catalogLine = username + FIELD_SEPARATOR + salt + FIELD_SEPARATOR + hashedPassword + "\n";
         try {
             Files.write(CATALOG_PATH, catalogLine.getBytes(), StandardOpenOption.APPEND);
             getUserDirectoryPath(username);

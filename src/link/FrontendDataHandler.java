@@ -41,28 +41,26 @@ public class FrontendDataHandler extends DataHandler {
             LogInResponseInstructionDatum lirid = (LogInResponseInstructionDatum)instructionDatum;
             switch (lirid.RESPONSE_CODE) {
                 case LOGIN_FAILURE_DUPLICATE_ACCOUNT_CREATION:
-                    System.out.println("Duplicate account creation!");
+                    DefinitionsManager.getLoginResponseHandler().loginResponseDuplicateAccountCreation();
                     break;
                 case LOGIN_FAILURE_ACCOUNT_ALREADY_CONNECTED:
-                    System.out.println("Account was already connected!");
-                    //todo - proper user notification
+                    DefinitionsManager.getLoginResponseHandler().loginResponseAccountAlreadyConnected();
                     break;
                 case LOGIN_FAILURE_ACCOUNT_DID_NOT_EXIST:
-                    System.out.println("Account did not exist!");
-                    //todo - proper user notification
+                    DefinitionsManager.getLoginResponseHandler().loginResponseAccountDoesNotExist();
                     break;
                 case LOGIN_FAILURE_INCORRECT_PASSWORD:
-                    System.out.println("Incorrect password!");
-                    //todo - proper user notification
+                    DefinitionsManager.getLoginResponseHandler().loginResponseIncorrectPassword();
                     break;
                 case LOGIN_SUCCESS:
-                    System.out.println("Login successful!");
-                    //todo - progress the game to character selection, probably.
                     UserAccountManager.activeSession = lirid.USER_ACCOUNT;
+                    DefinitionsManager.getLoginResponseHandler().loginResponseSuccess();
                     break;
                     default:
                         throw new IllegalStateException("Unhandled response code: " + lirid.RESPONSE_CODE);
             }
+        } else if (instructionDatum instanceof LogOutInstructionDatum) {
+            System.exit(0); //proper logout
         } else {
                 //todo - more cases
                 throw new IllegalArgumentException("Unhandled InstructionDatum class: " + instructionDatum.getClass());

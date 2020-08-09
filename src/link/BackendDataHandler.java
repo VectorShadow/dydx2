@@ -79,9 +79,10 @@ public class BackendDataHandler extends DataHandler {
                 }
             }
         } else if (instructionDatum instanceof LogOutInstructionDatum) {
-            responseLink.terminate(); //stop thread execution
             LogOutInstructionDatum lorid = (LogOutInstructionDatum)instructionDatum;
             LiveLog.log("User \"" + lorid.USERNAME + "\" requested logout.", LiveLog.LogEntryPriority.INFO);
+            responseLink.transmit(new LogOutInstructionDatum(null)); //send logout confirmation
+            responseLink.terminate(); //stop thread execution
             Engine.getInstance().disconnectDataLink(responseLink); //instruct the engine to properly remove the link
         } else if (instructionDatum instanceof OrderTransmissionInstructionDatum){
             OrderTransmissionInstructionDatum otid = (OrderTransmissionInstructionDatum)instructionDatum;
