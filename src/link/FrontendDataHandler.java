@@ -25,6 +25,7 @@ public class FrontendDataHandler extends DataHandler {
 
     @Override
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
+        LiveLog.log("Received instruction datum of class " + instructionDatum.getClass(), DEBUG);
         if (instructionDatum instanceof GameZoneInstructionDatum) {
             GameZone.frontEnd = ((GameZoneInstructionDatum)instructionDatum).GAME_ZONE;
             DefinitionsManager.getGameZoneUpdateListener().changeGameZone();

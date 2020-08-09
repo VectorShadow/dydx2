@@ -8,6 +8,8 @@ import main.LogHub;
 import user.UserAccount;
 import user.UserAccountManager;
 
+import java.util.Arrays;
+
 import static link.instructions.LogInResponseInstructionDatum.*;
 import static user.UserAccountManager.*;
 
@@ -27,8 +29,12 @@ public class BackendDataHandler extends DataHandler {
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
         if (instructionDatum instanceof AccountCreationRequestInstructionDatum) {
             AccountCreationRequestInstructionDatum acrid = (AccountCreationRequestInstructionDatum)instructionDatum;
+            LiveLog.log("Received Account Creation Request: " +
+                    "\nUsername: " + acrid.USERNAME +
+                    "\nSalt: " + acrid.SALT +
+                    "\nPassword hashed to: " + new String(acrid.HASHED_PASSWORD), LiveLog.LogEntryPriority.DEBUG);
             UserAccount createdAccount =
-                    UserAccountManager.createUserAccount(acrid.USERNAME, acrid.SALT, acrid.HASHED_PASSWORD);
+                    UserAccountManager.createUserAccount(acrid.USERNAME, acrid.SALT, new String(acrid.HASHED_PASSWORD));
             responseLink.transmit(
                     new LogInResponseInstructionDatum(
                             createdAccount == null ? LOGIN_FAILURE_DUPLICATE_ACCOUNT_CREATION : LOGIN_SUCCESS,
@@ -61,8 +67,7 @@ public class BackendDataHandler extends DataHandler {
                                     null
                             )
                     );
-                } else if (!catalogFields[HASHED_PASSWORD].equals(lirid.getHashedPassword(catalogFields[SALT]))) {
-                    System.out.println(catalogFields[HASHED_PASSWORD] + "\n was not equal to " + lirid.getHashedPassword(catalogFields[SALT]));
+                } else if (!Arrays.equals(catalogFields[HASHED_PASSWORD].getBytes(), lirid.getHashedPassword(catalogFields[SALT]))) {
                     responseLink.transmit(
                             new LogInResponseInstructionDatum(
                                     LOGIN_FAILURE_INCORRECT_PASSWORD,

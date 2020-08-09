@@ -205,13 +205,6 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         if (linkConnectionCount != zoneConnectionCount)
             throw new IllegalStateException("Invariant failure - link connections: " + linkConnectionCount +
                     " zone connections: " + zoneConnectionCount);
-        for (DataLinkSession dls1 : dataLinkSessions) {
-            for (DataLinkSession dls2 : dataLinkSessions) {
-                if (dls1 != dls2)
-                    if (((RemoteDataLink)dls1.LINK).getSocket().getLocalPort() == ((RemoteDataLink)dls2.LINK).getSocket().getLocalPort())
-                        throw new IllegalStateException("Invariant failure - sockets from different links connected on the same port!");
-            }
-        }
     }
 
     /**
