@@ -8,8 +8,6 @@ import main.LogHub;
 import user.UserAccount;
 import user.UserAccountManager;
 
-import java.util.Arrays;
-
 import static link.instructions.LogInResponseInstructionDatum.*;
 import static user.UserAccountManager.*;
 
@@ -27,14 +25,15 @@ public class BackendDataHandler extends DataHandler {
 
     @Override
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
+        UserAccount loggedInAccount;
         if (instructionDatum instanceof AccountCreationRequestInstructionDatum) {
             AccountCreationRequestInstructionDatum acrid = (AccountCreationRequestInstructionDatum)instructionDatum;
             UserAccount createdAccount =
-                    UserAccountManager.createUserAccount(acrid.USERNAME, acrid.SALT, new String(acrid.HASHED_PASSWORD));
+                    UserAccountManager.createUserAccount(acrid.USERNAME, acrid.SALT, acrid.HASHED_PASSWORD);
             responseLink.transmit(
                     new LogInResponseInstructionDatum(
-                            createdAccount == null ? LOGIN_FAILURE_DUPLICATE_ACCOUNT_CREATION : LOGIN_SUCCESS,
-                            createdAccount
+                            createdAccount == null ? null : createdAccount.buildMetadata(),
+                            createdAccount == null ? LOGIN_FAILURE_DUPLICATE_ACCOUNT_CREATION : LOGIN_SUCCESS
                     )
             );
             if (createdAccount != null)
@@ -45,12 +44,12 @@ public class BackendDataHandler extends DataHandler {
             if (catalogFields == null) {
                 responseLink.transmit(
                         new LogInResponseInstructionDatum(
-                                LOGIN_FAILURE_ACCOUNT_DID_NOT_EXIST,
-                                null
+                                null,
+                                LOGIN_FAILURE_ACCOUNT_DID_NOT_EXIST
                         )
                 );
             } else {
-                UserAccount loggedInAccount = UserAccount.load(catalogFields[USERNAME]);
+                loggedInAccount = UserAccount.load(catalogFields[USERNAME]);
                 if (Engine.getInstance().isConnected(loggedInAccount)) {
                     /*
                      * Check for a duplicate login prior to other checks.
@@ -59,22 +58,22 @@ public class BackendDataHandler extends DataHandler {
                      */
                     responseLink.transmit(
                             new LogInResponseInstructionDatum(
-                                    LOGIN_FAILURE_ACCOUNT_ALREADY_CONNECTED,
-                                    null
+                                    null,
+                                    LOGIN_FAILURE_ACCOUNT_ALREADY_CONNECTED
                             )
                     );
                 } else if (!catalogFields[HASHED_PASSWORD].equals(lirid.getHashedPassword(catalogFields[SALT]))) {
                     responseLink.transmit(
                             new LogInResponseInstructionDatum(
-                                    LOGIN_FAILURE_INCORRECT_PASSWORD,
-                                    null
+                                    null,
+                                    LOGIN_FAILURE_INCORRECT_PASSWORD
                             )
                     );
                 } else {
                     responseLink.transmit(
                             new LogInResponseInstructionDatum(
-                                    LOGIN_SUCCESS,
-                                    loggedInAccount
+                                    loggedInAccount.buildMetadata(),
+                                    LOGIN_SUCCESS
                             )
                     );
                     Engine.getInstance().connectUserAccount(responseLink, loggedInAccount);
@@ -82,8 +81,11 @@ public class BackendDataHandler extends DataHandler {
             }
         } else if (instructionDatum instanceof LogOutInstructionDatum) {
             LogOutInstructionDatum lorid = (LogOutInstructionDatum)instructionDatum;
-            LiveLog.log("User \"" + lorid.USERNAME + "\" requested logout.", LiveLog.LogEntryPriority.INFO);
-            responseLink.transmit(new LogOutInstructionDatum(null)); //send logout confirmation
+            LiveLog.log(
+                    "User \"" + Engine.getInstance().getUserAccount(responseLink).getName() +
+                    "\" requested logout.", LiveLog.LogEntryPriority.INFO
+            );
+            responseLink.transmit(new LogOutInstructionDatum()); //send logout confirmation
             responseLink.terminate(); //stop thread execution
             Engine.getInstance().disconnectDataLink(responseLink); //instruct the engine to properly remove the link
         } else if (instructionDatum instanceof OrderTransmissionInstructionDatum){
@@ -95,13 +97,25 @@ public class BackendDataHandler extends DataHandler {
         } else if (instructionDatum instanceof ReportChecksumMismatchInstructionDatum) {
             responseLink.transmit(new GameZoneInstructionDatum(Engine.getInstance().getGameZone(responseLink)));
         } else if (instructionDatum instanceof SelectAvatarInstructionData) {
-            Engine.getInstance().connectUserAvatar(
-                    responseLink,
-                    ((SelectAvatarInstructionData)instructionDatum).USER_AVATAR
-            );
-            responseLink.transmit( //re-transmit the avatar back to the sender with its new Actor set.
-                    new SelectAvatarInstructionData(
-                            Engine.getInstance().getUserAccount(responseLink).getCurrentAvatar()
+            int avatarIndex = ((SelectAvatarInstructionData)instructionDatum).AVATAR_INDEX;
+            loggedInAccount = Engine.getInstance().getUserAccount(responseLink);
+            if (avatarIndex < 0) {
+                avatarIndex =
+                        loggedInAccount
+                        .addAvatar(
+                                DefinitionsManager.
+                                        getAvatarManager().
+                                        createNewAvatar(avatarIndex)
+                        );
+            }
+            //Here, engine selects the specified avatar from its account, then places an appropriate actor in its gamezone
+            int actorID = Engine.getInstance().connectUserAvatar(responseLink, avatarIndex);
+            //finally, send the frontend a datum specifying which actor serial ID in its gamezone belongs to it
+            responseLink.transmit(
+                    new IdentifyAvatarAndActorInstructionDatum(
+                            loggedInAccount.buildMetadata(),
+                            actorID,
+                            avatarIndex
                     )
             );
         }

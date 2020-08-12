@@ -7,6 +7,7 @@ import gamestate.coordinates.ZoneCoordinate;
  * Manage all implementation level definitions required to handle actions and interactions beyond the engine context.
  */
 public class DefinitionsManager {
+    private static AvatarManager avatarManager = null;
     private static GameZoneGenerator gameZoneGenerator = null;
     private static GameZoneUpdateListener gameZoneUpdateListener = null;
     private static LoginResponseHandler loginResponseHandler = null;
@@ -14,12 +15,14 @@ public class DefinitionsManager {
     private static TerrainLookup terrainLookup = null;
 
     public static void loadDefinitions(
+            AvatarManager am,
             GameZoneGenerator gzg,
             GameZoneUpdateListener gzul,
             LoginResponseHandler lrh,
             OrderExecutor oe,
             TerrainLookup tl
     ) {
+        avatarManager = am;
         gameZoneGenerator = gzg;
         gameZoneUpdateListener = gzul;
         loginResponseHandler = lrh;
@@ -29,6 +32,10 @@ public class DefinitionsManager {
 
     public static GameZone generateZone(ZoneCoordinate zc) {
         return gameZoneGenerator.getGameZoneBuilder(zc).build();
+    }
+
+    public static AvatarManager getAvatarManager() {
+        return avatarManager;
     }
 
     public static GameZoneUpdateListener getGameZoneUpdateListener() {

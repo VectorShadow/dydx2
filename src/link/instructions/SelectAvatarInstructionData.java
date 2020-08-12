@@ -1,11 +1,13 @@
 package link.instructions;
 
-import user.UserAvatar;
-
 public class SelectAvatarInstructionData extends InstructionDatum {
-    public final UserAvatar USER_AVATAR;
+    /**
+     * Values >= 0 indicate the index of the avatar within the account metadata to select.
+     * Values < 0 indicate creation parameters to generate a new avatar.
+     */
+    public final int AVATAR_INDEX;
 
-    public SelectAvatarInstructionData(UserAvatar userAvatar) {
-        USER_AVATAR = userAvatar;
+    public SelectAvatarInstructionData(int avatarIndex) {
+        AVATAR_INDEX = avatarIndex;
     }
 }

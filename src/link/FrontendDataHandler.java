@@ -1,13 +1,12 @@
 package link;
 
 import definitions.DefinitionsManager;
-import gamestate.gameobject.GameActor;
 import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
 import link.instructions.*;
 import main.LiveLog;
 import main.LogHub;
-import user.UserAccountManager;
+import user.PlayerSession;
 
 import static link.instructions.LogInResponseInstructionDatum.*;
 import static main.LiveLog.LogEntryPriority.*;
@@ -25,7 +24,6 @@ public class FrontendDataHandler extends DataHandler {
 
     @Override
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
-        LiveLog.log("Received instruction datum of class " + instructionDatum.getClass(), DEBUG);
         if (instructionDatum instanceof GameZoneInstructionDatum) {
             GameZone.frontEnd = ((GameZoneInstructionDatum)instructionDatum).GAME_ZONE;
             DefinitionsManager.getGameZoneUpdateListener().changeGameZone();
@@ -55,7 +53,7 @@ public class FrontendDataHandler extends DataHandler {
                     DefinitionsManager.getLoginResponseHandler().loginResponseIncorrectPassword();
                     break;
                 case LOGIN_SUCCESS:
-                    UserAccountManager.activeSession = lirid.USER_ACCOUNT;
+                    PlayerSession.setAccountMetadata(lirid.ACCOUNT_METADATA);
                     DefinitionsManager.getLoginResponseHandler().loginResponseSuccess();
                     break;
                     default:
@@ -63,26 +61,10 @@ public class FrontendDataHandler extends DataHandler {
             }
         } else if (instructionDatum instanceof LogOutInstructionDatum) {
             System.exit(0); //proper logout
-        } else if (instructionDatum instanceof SelectAvatarInstructionData) {
-            /*
-             * update the front end session with a user avatar that's had it's current actor created by the engine
-             * so that its SerialID synchs with the actor added to the GameZone
-             */
-            UserAccountManager.
-                    activeSession.
-                    getCurrentAvatar()
-                    .setActor(
-                            (GameActor)
-                            GameZone.
-                                    frontEnd.
-                                    getActorMap().
-                                    get(
-                                            ((SelectAvatarInstructionData)instructionDatum).
-                                                    USER_AVATAR.
-                                                    getActor().
-                                                    getSerialID()
-                                    )
-                    );
+        } else if (instructionDatum instanceof IdentifyAvatarAndActorInstructionDatum) {
+            IdentifyAvatarAndActorInstructionDatum iaaaid = (IdentifyAvatarAndActorInstructionDatum)instructionDatum;
+            PlayerSession.setAvatarIndex(iaaaid.AVATAR_INDEX);
+            PlayerSession.setActorID(iaaaid.ACTOR_ID);
         } else {
                 //todo - more cases
                 throw new IllegalArgumentException("Unhandled InstructionDatum class: " + instructionDatum.getClass());

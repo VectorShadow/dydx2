@@ -24,14 +24,6 @@ public class UserAccountManager {
     public static final int HASHED_PASSWORD = 2;
 
     /**
-     * This is the user account presented to the front end. It must be null on the back end(since the back end tracks
-     * multiple sessions and should never refer to a single global session).
-     * The FrontEndDataHandler will keep this updated.
-     * The implementation will need access to it to track the player's current state.
-     */
-    public static UserAccount activeSession = null;
-
-    /**
      * Query the user catalog for the specified username.
      * @param username the user name to query.
      * @return a String array containing the username, salt, and hashed password if found, or null if not

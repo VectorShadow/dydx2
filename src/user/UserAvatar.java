@@ -19,6 +19,15 @@ public abstract class UserAvatar implements Serializable {
         at = ZoneCoordinate.ORIGIN_ZONE;
     }
 
+
+    /**
+     * Generate an AvatarMetadata object based on this avatar.
+     */
+    public AvatarMetadata buildMetadata() {
+        //todo - build this dynamically
+        return new AvatarMetadata();
+    }
+
     /**
      * Construct an appropriate Actor for this Avatar on the engine side(so it conforms to serial ID invariant).
      * This method first calls deriveActor(), which is an implementation specific method for creating an actor

@@ -1,6 +1,7 @@
 package main;
 
 import definitions.DefinitionsManager;
+import gamestate.gameobject.GameActor;
 import gamestate.gamezone.GameZone;
 import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gamezone.GameZoneUpdate;
@@ -99,11 +100,13 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
 
     /**
      * Connect a DataLinkSession to a ZoneSession once a user has selected an avatar.
+     * @return the serialID of the actor associated with the connected account and avatar.
      */
-    void connectLinkToZone(DataLink dataLink, UserAvatar userAvatar) {
+    int connectLinkToZone(DataLink dataLink, int userAvatarIndex) {
         DataLinkSession dls = get(dataLink);
         UserAccount ua = dls.userAccount;
-        ua.setCurrentAvatar(userAvatar);
+        ua.setCurrentAvatar(userAvatarIndex);
+        UserAvatar userAvatar = ua.getCurrentAvatar();
         ZoneCoordinate zc = userAvatar.getAt();
         ZoneSession zs = get(zc);
         GameZone gz;
@@ -118,10 +121,8 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
             dataLink.transmit(new GameZoneInstructionDatum(gz));
             connect(dataLink, zc);
         }
-        GameZoneUpdate addActor = new GameZoneUpdate(
-                "addActor",
-                userAvatar.constructActor() //engine side actor creation
-        );
+        GameActor userActor = userAvatar.constructActor(); //engine side actor creation
+        GameZoneUpdate addActor = new GameZoneUpdate("addActor", userActor);
         gz.apply(addActor);
         ArrayList<GameZoneUpdate> addActorAsList = new ArrayList<>();
         addActorAsList.add(addActor);
@@ -132,6 +133,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
                 )
         );
         LiveLog.log("Connected user " + ua.getName() + " to GameZone at " + zc, INFO);
+        return userActor.getSerialID();
     }
 
     /**

@@ -35,10 +35,8 @@ public abstract class OrderExecutor {
      * remain synchronized.
      */
     public void frontEndHandleDisconnection() {
-        if (UserAccountManager.activeSession == null) return; //nothing to do if no session has begun
-        UserAvatar userAvatar = UserAccountManager.activeSession.getCurrentAvatar();
-        if (userAvatar == null) return; //nothing to do if a session exists but no avatar has been selected yet
-        GameActor userActor = userAvatar.getActor();
+        GameActor userActor = null;
+        //todo - the player session  should know which actor is the player's - get this one. if not, nothing to do
         if (userActor == null) return;
         userActor.setMovementOrder(null);
         userActor.setRotationOrder(null);

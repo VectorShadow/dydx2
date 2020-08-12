@@ -16,7 +16,7 @@ public class UserAccount implements Serializable {
 
     private final String NAME;
     private final ArrayList<UserAvatar> AVATARS;
-    private UserAvatar currentAvatar = null;
+    private int currentAvatarIndex = -1;
     //todo - more fields?
 
     UserAccount(String userName) {
@@ -37,7 +37,7 @@ public class UserAccount implements Serializable {
     }
 
     public void save() {
-        currentAvatar = null; //clear the current avatar whenever we save the account
+        currentAvatarIndex = -1; //clear the current avatar whenever we save the account
         try {
             FileOutputStream fos = new FileOutputStream(getAccountSaveFileName(NAME));
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -51,15 +51,33 @@ public class UserAccount implements Serializable {
         return getUserDirectoryPath(username).toString() + "/" + ACCOUNT_FILE_NAME;
     }
 
+    /**
+     * Add a new UserAvatar to this account.
+     * @return the index of the newly added Avatar.
+     */
+    public int addAvatar(UserAvatar userAvatar) {
+        if (AVATARS.size() >= MAX_AVATAR_COUNT)
+            throw new IllegalStateException("Attempted to add avatar beyond max capacity.");
+        AVATARS.add(userAvatar);
+        return AVATARS.size() - 1;
+    }
+
+    public AccountMetadata buildMetadata() {
+        ArrayList<AvatarMetadata> avatarMetadata = new ArrayList<>();
+        for (UserAvatar userAvatar : AVATARS)
+            avatarMetadata.add(userAvatar.buildMetadata());
+        return new AccountMetadata(avatarMetadata, NAME);
+    }
+
     public UserAvatar getCurrentAvatar() {
-        return currentAvatar;
+        return AVATARS.get(currentAvatarIndex);
     }
 
     public String getName() {
         return NAME;
     }
 
-    public void setCurrentAvatar(UserAvatar currentAvatar) {
-        this.currentAvatar = currentAvatar;
+    public void setCurrentAvatar(int avatarIndex) {
+        currentAvatarIndex = avatarIndex;
     }
 }
