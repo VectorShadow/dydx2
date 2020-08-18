@@ -1,6 +1,7 @@
 package gamestate.coordinates;
 
 import gamestate.TransmittableGameAsset;
+import util.Direction;
 
 import java.io.Serializable;
 
@@ -22,6 +23,13 @@ public class Coordinate extends TransmittableGameAsset {
     public Coordinate(int column, int row) {
         COLUMN = column;
         ROW = row;
+    }
+
+    /**
+     * Find the adjacent coordinate in the specified direction from the source coordinate.
+     */
+    public Coordinate(Coordinate coordinate, Direction direction) {
+        this(coordinate.COLUMN + direction.COL_CHANGE, coordinate.ROW + direction.ROW_CHANGE);
     }
 
     @Override
