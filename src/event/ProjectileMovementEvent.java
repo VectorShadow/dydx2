@@ -19,7 +19,7 @@ public class ProjectileMovementEvent extends Event {
     }
 
     @Override
-    public ArrayList<GameZoneUpdate> execute() {
+    public ArrayList<GameZoneUpdate> execute(GameZone gameZone) {
         ArrayList<GameZoneUpdate> updateList = new ArrayList<>();
         if (PROJECTILE.isDirect()) {
             //todo - handle disposal if travel() comes up short
@@ -28,7 +28,7 @@ public class ProjectileMovementEvent extends Event {
                     new GameZoneUpdate(
                             "moveProjectile",
                             PROJECTILE.getSerialID(),
-                            Pathfinder.travel(PROJECTILE, true)
+                            Pathfinder.travel(gameZone, PROJECTILE, true)
                     )
             );
         }

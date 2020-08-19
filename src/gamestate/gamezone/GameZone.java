@@ -89,7 +89,6 @@ public class GameZone extends TransmittableGameAsset {
     void addActor(GameActor actor) {
         //todo - check this terrain tile to see if it can fit an actor here!
         // does that check go here and throw an exception? or at whatever calls this?
-        actor.setGameZone(this);
         ACTOR_MAP.put(actor.getSerialID(), actor);
         ACTOR_LIST.add(actor);
         PointCoordinate pc = actor.getAt();

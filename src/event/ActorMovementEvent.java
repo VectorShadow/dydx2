@@ -1,6 +1,7 @@
 package event;
 
 import ai.Pathfinder;
+import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
 import gamestate.gameobject.GameActor;
 
@@ -18,13 +19,13 @@ public class ActorMovementEvent extends Event {
     }
 
     @Override
-    public ArrayList<GameZoneUpdate> execute() {
+    public ArrayList<GameZoneUpdate> execute(GameZone gameZone) {
         ArrayList<GameZoneUpdate> updateList = new ArrayList<>();
         updateList.add(
                 new GameZoneUpdate(
                         "moveActor",
                         ACTOR.getSerialID(),
-                        Pathfinder.travel(ACTOR, FORWARD)
+                        Pathfinder.travel(gameZone, ACTOR, FORWARD)
                 )
         );
         return updateList;

@@ -4,6 +4,7 @@ import definitions.DefinitionsManager;
 import gamestate.coordinates.PointCoordinate;
 import gamestate.coordinates.Coordinate;
 import gamestate.gameobject.MobileGameObject;
+import gamestate.gamezone.GameZone;
 import gamestate.terrain.TerrainTile;
 
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class Pathfinder {
 
     //todo - we need to adapt this method to handle energetic projectiles eventually, and if so we need to convey
     // any reduction that results from passing through translucent tiles.
-    public static PointCoordinate travel(MobileGameObject mgo, boolean forward) {
+    public static PointCoordinate travel(GameZone gameZone, MobileGameObject mgo, boolean forward) {
         PointCoordinate at = mgo.getAt();
         double direction = mgo.getFacing();
         int speed = mgo.getMovementSpeed();
@@ -88,7 +89,7 @@ public class Pathfinder {
         for (int i = 1; i < pathPoints.size(); ++i) {
             //interpret the trajectory coordinates as point coordinates so we can access their parent tile coordinates
             pathPoint = new PointCoordinate(pathPoints.get(i));
-            terrainTile = mgo.getGameZone().tileAt(pathPoint.getParentTileCoordinate());
+            terrainTile = gameZone.tileAt(pathPoint.getParentTileCoordinate());
             if (DefinitionsManager.getTerrainLookup().checkAccess(mgo, terrainTile))
                 at = pathPoint;
             else break;

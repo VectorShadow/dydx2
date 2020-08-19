@@ -1,5 +1,6 @@
 package event;
 
+import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
 
 import java.util.ArrayList;
@@ -32,6 +33,6 @@ public abstract class Event implements Comparable<Event> {
         return XO.compareTo(e.XO);
     }
 
-    public abstract ArrayList<GameZoneUpdate> execute();
+    public abstract ArrayList<GameZoneUpdate> execute(GameZone gameZone);
 
 }

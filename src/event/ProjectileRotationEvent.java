@@ -19,7 +19,7 @@ public class ProjectileRotationEvent extends Event {
     }
 
     @Override
-    public ArrayList<GameZoneUpdate> execute() {
+    public ArrayList<GameZoneUpdate> execute(GameZone gameZone) {
         ArrayList<GameZoneUpdate> updateList = new ArrayList<>();
         updateList.add(
                 new GameZoneUpdate(

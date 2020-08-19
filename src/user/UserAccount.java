@@ -30,6 +30,8 @@ public class UserAccount implements Serializable {
             FileInputStream fis = new FileInputStream(getAccountSaveFileName(username));
             ObjectInputStream ois = new ObjectInputStream(fis);
             ua = (UserAccount) ois.readObject();
+            ois.close();
+            fis.close();
         } catch (Exception e) {
             LogHub.logFatalCrash("Error loading user account.", e);
         }
@@ -39,9 +41,11 @@ public class UserAccount implements Serializable {
     public void save() {
         currentAvatarIndex = -1; //clear the current avatar whenever we save the account
         try {
-            FileOutputStream fos = new FileOutputStream(getAccountSaveFileName(NAME));
+            FileOutputStream fos = new FileOutputStream(getAccountSaveFileName(NAME), false);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(this);
+            oos.close();
+            fos.close();
         } catch (Exception e) {
             LogHub.logFatalCrash("Error saving user account.", e);
         }

@@ -45,7 +45,7 @@ public class ZoneSession {
             ArrayList<GameZoneUpdate> turnUpdates = new ArrayList<>();
             for (Event e : eventQueue) {
                 //get all updates associated with each event
-                eventUpdates = e.execute();
+                eventUpdates = e.execute(GAME_ZONE);
                 //collect all updates for transmission, then apply them to this processor's GameZone
                 for (GameZoneUpdate gzu : eventUpdates) {
                     turnUpdates.add(gzu);
