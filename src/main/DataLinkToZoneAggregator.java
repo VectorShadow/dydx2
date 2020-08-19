@@ -121,7 +121,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
             dataLink.transmit(new GameZoneInstructionDatum(gz));
             connect(dataLink, zc);
         }
-        GameActor userActor = userAvatar.constructActor(); //engine side actor creation
+        GameActor userActor = userAvatar.getActor();
         GameZoneUpdate addActor = new GameZoneUpdate("addActor", userActor);
         gz.apply(addActor);
         ArrayList<GameZoneUpdate> addActorAsList = new ArrayList<>();

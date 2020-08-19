@@ -11,9 +11,9 @@ import java.io.Serializable;
  */
 public abstract class UserAvatar implements Serializable {
 
-    private GameActor actor;
+    protected GameActor actor = null;
 
-    private ZoneCoordinate at;
+    protected ZoneCoordinate at;
 
     public UserAvatar() {
         at = ZoneCoordinate.ORIGIN_ZONE;
@@ -23,32 +23,23 @@ public abstract class UserAvatar implements Serializable {
     /**
      * Generate an AvatarMetadata object based on this avatar.
      */
-    public AvatarMetadata buildMetadata() {
-        //todo - build this dynamically
-        return new AvatarMetadata();
-    }
+    abstract AvatarMetadata buildMetadata();
 
     /**
-     * Construct an appropriate Actor for this Avatar on the engine side(so it conforms to serial ID invariant).
-     * This method first calls deriveActor(), which is an implementation specific method for creating an actor
-     * to represent this Avatar in its GameZone. It then sets its own actor with the returned value, and returns it
-     * for external usage.
+     * Get the current actor in use by this Avatar.
+     * If the current actor is null, call the implementation's createActor method, which will dynamically generate
+     * or select a pre-generated Actor.
      */
-    public GameActor constructActor() {
-        setActor(deriveActor());
-        return getActor();
-    }
-
-    /**
-     * Implementation specific method for deriving an Actor to represent this Avatar. This *must* construct a new
-     * GameActor object, whether by building one from stored values or cloning a stored value, else it will break the
-     * serialID invariant.
-     */
-    protected abstract GameActor deriveActor();
-
     public GameActor getActor() {
+        if (actor == null)
+            createActor();
         return actor;
     }
+
+    /**
+     * Dynamically generate an actor, or select a pre-generated actor, based on implementation.
+     */
+    protected abstract void createActor();
 
     public ZoneCoordinate getAt() {
         return at;

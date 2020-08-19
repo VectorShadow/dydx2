@@ -2,6 +2,7 @@ package user;
 
 import gamestate.TransmittableGameAsset;
 
-public class AvatarMetadata extends TransmittableGameAsset {
-    //todo - lots here, probably - definitely names, probably classes
+public abstract class AvatarMetadata extends TransmittableGameAsset {
+    @Override
+    public abstract String toString();
 }
