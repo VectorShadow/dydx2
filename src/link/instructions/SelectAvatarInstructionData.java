@@ -7,7 +7,10 @@ public class SelectAvatarInstructionData extends InstructionDatum {
      */
     public final int AVATAR_INDEX;
 
-    public SelectAvatarInstructionData(int avatarIndex) {
+    public final String NAME;
+
+    public SelectAvatarInstructionData(int avatarIndex, String name) {
         AVATAR_INDEX = avatarIndex;
+        NAME = name;
     }
 }

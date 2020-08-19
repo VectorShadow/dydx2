@@ -105,7 +105,10 @@ public class BackendDataHandler extends DataHandler {
                         .addAvatar(
                                 DefinitionsManager.
                                         getAvatarManager().
-                                        createNewAvatar(avatarIndex)
+                                        createNewAvatar(
+                                                avatarIndex,
+                                                ((SelectAvatarInstructionData)instructionDatum).NAME
+                                        )
                         );
             }
             //Here, engine selects the specified avatar from its account, then places an appropriate actor in its gamezone
