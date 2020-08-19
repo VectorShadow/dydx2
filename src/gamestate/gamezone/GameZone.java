@@ -8,8 +8,6 @@ import gamestate.gameobject.GameProjectile;
 import gamestate.gameobject.MobileGameObject;
 import gamestate.terrain.TerrainTile;
 import main.LogHub;
-import user.UserAccountManager;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
