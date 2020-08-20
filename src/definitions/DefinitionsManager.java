@@ -8,6 +8,7 @@ import gamestate.coordinates.ZoneCoordinate;
  */
 public class DefinitionsManager {
     private static AvatarManager avatarManager = null;
+    private static FeatureHandler featureHandler = null;
     private static GameZoneGenerator gameZoneGenerator = null;
     private static GameZoneUpdateListener gameZoneUpdateListener = null;
     private static LoginResponseHandler loginResponseHandler = null;
@@ -16,6 +17,7 @@ public class DefinitionsManager {
 
     public static void loadDefinitions(
             AvatarManager am,
+            FeatureHandler fh,
             GameZoneGenerator gzg,
             GameZoneUpdateListener gzul,
             LoginResponseHandler lrh,
@@ -23,6 +25,7 @@ public class DefinitionsManager {
             TerrainLookup tl
     ) {
         avatarManager = am;
+        featureHandler = fh;
         gameZoneGenerator = gzg;
         gameZoneUpdateListener = gzul;
         loginResponseHandler = lrh;
@@ -36,6 +39,10 @@ public class DefinitionsManager {
 
     public static AvatarManager getAvatarManager() {
         return avatarManager;
+    }
+
+    public static FeatureHandler getFeatureHandler() {
+        return featureHandler;
     }
 
     public static GameZoneUpdateListener getGameZoneUpdateListener() {

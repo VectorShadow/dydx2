@@ -10,15 +10,15 @@ package gamestate.terrain;
 public abstract class TerrainProperties {
 
     /**
-     * This value indicates that vision and energy projectiles may pass through this terrain freely.
-     */
-    public static final int ENERGY_PERMISSION_TRANSPARENT = 1;
-
-    /**
      * This value indicates that vision and energy projectiles will terminate on this tile. Both will still affect this
      * tile - it will be seen, and affected by the projectile if applicable.
      */
     public static final int ENERGY_PERMISSION_OPAQUE = 0;
+
+    /**
+     * This value indicates that vision and energy projectiles may pass through this terrain freely.
+     */
+    public static final int ENERGY_PERMISSION_TRANSPARENT = 1;
 
     /**
      * This value indicates that any entity capable of movement may pass this tile with no penalty.
@@ -75,6 +75,27 @@ public abstract class TerrainProperties {
     public static final int MATTER_PERMISSION_IMPASSABLE = 7;
 
     /**
+     * This value indicates a terrain feature which does not permit any sort of travel.
+     */
+    public static final int TRAVEL_PERMISSION_NONE = 0;
+
+    /**
+     * This value indicates a terrain feature which permits travel to a deeper level within the current location.
+     */
+    public static final int TRAVEL_PERMISSION_DOWN = 1;
+
+    /**
+     * This value indicates a terrain feature which permits travel to a shallower level within the current location.
+     */
+    public static final int TRAVEL_PERMISSION_UP = 2;
+
+    /**
+     * This value indicates a terrain feature which permits travel to a different location.
+     */
+    //todo - probably a definition which links locations via these travel actions
+    public static final int TRAVEL_PERMISSION_NEW_ZONE = 3;
+
+    /**
      * This value indicates how vision and energy based projectiles are affected upon reaching this terrain.
      */
     public final int ENERGY_PERMISSION;
@@ -88,9 +109,12 @@ public abstract class TerrainProperties {
      * to enter this terrain.
      */
     public final int MATTER_PERMISSION;
+
+    public final int TRAVEL_PERMISSION;
     
-    public TerrainProperties(int energyPermission, int matterPermission) {
+    public TerrainProperties(int energyPermission, int matterPermission, int travelPermission) {
         ENERGY_PERMISSION = energyPermission;
         MATTER_PERMISSION = matterPermission;
+        TRAVEL_PERMISSION = travelPermission;
     }
 }

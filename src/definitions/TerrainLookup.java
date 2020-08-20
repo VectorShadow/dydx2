@@ -32,4 +32,8 @@ public abstract class TerrainLookup {
     private int getMatterPermission(TerrainTile tt) {
         return lookup(tt.ID).MATTER_PERMISSION;
     }
+
+    private int getTravelPermission(TerrainTile tt) {
+        return lookup(tt.ID).TRAVEL_PERMISSION;
+    }
 }
