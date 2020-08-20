@@ -29,6 +29,10 @@ public class PlayerSession {
         return currentAvatarIndex;
     }
 
+    public static AvatarMetadata getCurrentAvatarMetadata() {
+        return accountMetadata.AVATAR_METADATA.get(currentAvatarIndex);
+    }
+
     public static void setAccountMetadata(AccountMetadata metadata) {
         accountMetadata = metadata;
     }

@@ -63,8 +63,9 @@ public class FrontendDataHandler extends DataHandler {
             System.exit(0); //proper logout
         } else if (instructionDatum instanceof IdentifyAvatarAndActorInstructionDatum) {
             IdentifyAvatarAndActorInstructionDatum iaaaid = (IdentifyAvatarAndActorInstructionDatum)instructionDatum;
-            PlayerSession.setAvatarIndex(iaaaid.AVATAR_INDEX);
+            PlayerSession.setAccountMetadata(iaaaid.ACCOUNT_METADATA);
             PlayerSession.setActorID(iaaaid.ACTOR_ID);
+            PlayerSession.setAvatarIndex(iaaaid.AVATAR_INDEX);
         } else {
                 //todo - more cases
                 throw new IllegalArgumentException("Unhandled InstructionDatum class: " + instructionDatum.getClass());
