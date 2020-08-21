@@ -37,6 +37,10 @@ public class Coordinate extends TransmittableGameAsset {
         return o instanceof Coordinate && COLUMN == ((Coordinate)o).COLUMN && ROW == ((Coordinate)o).ROW;
     }
 
+    public boolean isAdjacentTo(Coordinate c) {
+        return Math.abs(c.ROW - ROW) < 2 && Math.abs(c.COLUMN - COLUMN) < 2;
+    }
+
     @Override
     public String toString() {
         return "[c(x):" + COLUMN + ",r(y):" + ROW + "]";
