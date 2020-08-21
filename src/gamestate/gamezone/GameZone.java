@@ -7,6 +7,7 @@ import gamestate.coordinates.Coordinate;
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameProjectile;
 import gamestate.gameobject.MobileGameObject;
+import gamestate.gameobject.SerialGameObject;
 import gamestate.terrain.TerrainTile;
 import main.LogHub;
 import java.lang.reflect.InvocationTargetException;
@@ -19,14 +20,9 @@ import java.util.Map;
  * GameZones represent towns, fields, dungeons, and other such areas of a game to which one or more players
  * may be connected, and on which all game activity occurs.
  */
-public class GameZone extends TransmittableGameAsset {
+public class GameZone extends SerialGameObject {
 
-    /**
-     * This is the game zone presented to the front end.
-     * The FrontEndDataHandler will keep this updated.
-     * The implementation will need access to it to present a graphical representation to the user.
-     */
-    public static GameZone frontEnd = null;
+    private static int serialCount = 1;
 
     /**
      * Specify the size of the GameZone.
@@ -112,6 +108,14 @@ public class GameZone extends TransmittableGameAsset {
         TERRAIN[c.ROW][c.COLUMN].projectileList.add(projectile);
     }
 
+    public boolean contains(Coordinate coordinate) {
+        return
+                coordinate.COLUMN >= 0 &&
+                        coordinate.COLUMN < COLUMNS &&
+                        coordinate.ROW >= 0 &&
+                        coordinate.ROW < ROWS;
+    }
+
     public int countColumns() {
         return COLUMNS;
     }
@@ -165,9 +169,10 @@ public class GameZone extends TransmittableGameAsset {
         moveMobileGameObject(lookupProjectile(serialID), pc);
     }
     private void moveMobileGameObject(MobileGameObject mgo, PointCoordinate pc) {
+        Coordinate sourceTileCoordinate = mgo.getAt().getParentTileCoordinate();
         Coordinate destinationTileCoordinate = pc.getParentTileCoordinate();
-        TerrainTile source = tileAt(destinationTileCoordinate);
-        TerrainTile destination = tileAt(pc.getParentTileCoordinate());
+        TerrainTile source = tileAt(sourceTileCoordinate);
+        TerrainTile destination = tileAt(destinationTileCoordinate);
         boolean isProjectile = mgo instanceof GameProjectile;
         //indirect projectiles are not tracked by terrain tiles.
         if (isProjectile && !((GameProjectile)mgo).isDirect())
@@ -278,6 +283,9 @@ public class GameZone extends TransmittableGameAsset {
         if (PROJECTILE_LIST.size() != PROJECTILE_MAP.size())
             throw new IllegalStateException("Projectile discrepancy - list has size " + PROJECTILE_LIST.size() +
                     "but map has size " + PROJECTILE_MAP.size());
+        for (GameActor actor : ACTOR_LIST)
+            if (TERRAIN[actor.getAt().getParentTileCoordinate().ROW][actor.getAt().getParentTileCoordinate().COLUMN].actorList.isEmpty())
+                throw new IllegalStateException("Actor " + actor.getSerialID() + " purports to be at " + actor.getAt().getParentTileCoordinate() + " but terrain actor list there is empty!");
         //todo - more here?
     }
 
@@ -292,12 +300,26 @@ public class GameZone extends TransmittableGameAsset {
         } catch (NoSuchMethodException e) {
             LogHub.logFatalCrash("Update failure - NoSuchMethodException", e);
         }
-//        //test
-//        invariant();
-//        if (update.METHOD_NAME.equals("moveActor")) {
-//            System.out.println("Moved an actor - now:");
-//            for (GameActor ga : ACTOR_LIST)
-//                System.out.println("Actor with ID " + ga.getSerialID() + " is at " + ga.getAt() + " facing " + ga.getFacing());
-//        }
+        //test
+        invariant();
+    }
+
+    @Override
+    protected int nextSerialID() {
+        return serialCount++;
+    }
+
+    /**
+     * Determine equivalency via serialID.
+     * There is a small probability of collision when the server is reset - that is, a newly generated gamezone
+     * might have the same serialID as the stored serialID in the loaded avatar's knowledge.
+     * This is most likely to occur for the starting zone, which does not cause any problems, but it may occur rarely
+     * on other locations, in which case the only consequence will be an existing knowledge of terrain and features
+     * that shouldn't exist. In theory this should not occur frequently enough to be disruptive, but if it is,
+     * we'll need to find a better solution.
+     */
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof GameZone && ((GameZone) o).serialID == serialID;
     }
 }

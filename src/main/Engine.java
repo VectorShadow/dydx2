@@ -4,6 +4,7 @@ import gamestate.gamezone.GameZone;
 import link.DataLink;
 import user.UserAccount;
 import user.UserAvatar;
+import user.ZoneKnowledge;
 
 import static main.LiveLog.LogEntryPriority.*;
 
@@ -181,10 +182,10 @@ public class Engine extends Thread {
     }
 
     /**
-     * Access the game zone corresponding to the specified data link.
+     * Access the zone knowledge of the avatar corresponding to the specified data link.
      */
-    public GameZone getGameZone(DataLink dataLink) {
-        return LINK_TO_ZONE_AGGREGATOR.get(dataLink).zoneSession.getGameZone();
+    public ZoneKnowledge getZoneKnowledge(DataLink dataLink) {
+        return getUserAccount(dataLink).getCurrentAvatar().getZoneKnowledge();
     }
 
     /**

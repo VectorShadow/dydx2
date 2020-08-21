@@ -13,12 +13,9 @@ public abstract class UserAvatar implements Serializable {
 
     protected GameActor actor = null;
 
-    protected ZoneCoordinate at;
+    protected ZoneCoordinate at = ZoneCoordinate.ORIGIN_ZONE;
 
-    public UserAvatar() {
-        at = ZoneCoordinate.ORIGIN_ZONE;
-    }
-
+    private ZoneKnowledge zoneKnowledge = null;
 
     /**
      * Generate an AvatarMetadata object based on this avatar.
@@ -45,11 +42,19 @@ public abstract class UserAvatar implements Serializable {
         return at;
     }
 
+    public ZoneKnowledge getZoneKnowledge() {
+        return zoneKnowledge;
+    }
+
     public void setActor(GameActor actor) {
         this.actor = actor;
     }
 
     public void setAt(ZoneCoordinate at) {
         this.at = at;
+    }
+
+    public void setZoneKnowledge(ZoneKnowledge zk) {
+        zoneKnowledge = zk;
     }
 }

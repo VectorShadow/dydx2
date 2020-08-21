@@ -1,7 +1,6 @@
 package link;
 
 import definitions.DefinitionsManager;
-import gamestate.gamezone.GameZone;
 import gamestate.gamezone.GameZoneUpdate;
 import link.instructions.*;
 import main.LiveLog;
@@ -24,16 +23,16 @@ public class FrontendDataHandler extends DataHandler {
 
     @Override
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
-        if (instructionDatum instanceof GameZoneInstructionDatum) {
-            GameZone.frontEnd = ((GameZoneInstructionDatum)instructionDatum).GAME_ZONE;
+        if (instructionDatum instanceof ZoneKnowledgeInstructionDatum) {
+            PlayerSession.setZoneKnowledge(((ZoneKnowledgeInstructionDatum)instructionDatum).ZONE_KNOWLEDGE);
             DefinitionsManager.getGameZoneUpdateListener().changeGameZone();
             LiveLog.log("Loaded new gameZone on frontend.", INFO);
         } else if (instructionDatum instanceof GameZoneUpdateInstructionDatum) {
             GameZoneUpdateInstructionDatum gzuid = ((GameZoneUpdateInstructionDatum) instructionDatum);
             for (GameZoneUpdate gzu : gzuid.UPDATE_LIST)
-                GameZone.frontEnd.apply(gzu);
+                PlayerSession.getZoneKnowledge().getGameZone().apply(gzu);
             DefinitionsManager.getGameZoneUpdateListener().updateGameZone();
-            if (GameZone.frontEnd.getCheckSum() != gzuid.UPDATE_CHECKSUM) {
+            if (PlayerSession.getZoneKnowledge().getGameZone().getCheckSum() != gzuid.UPDATE_CHECKSUM) {
                 responseLink.transmit(new ReportChecksumMismatchInstructionDatum());
                 LiveLog.log("Game update checksum validation failed! Requesting updated game zone.", WARNING);
             }

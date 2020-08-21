@@ -8,6 +8,7 @@ import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameProjectile;
 import link.instructions.GameZoneUpdateInstructionDatum;
+import user.ZoneKnowledge;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -62,7 +63,7 @@ public class ZoneSession {
     final ArrayList<DataLinkSession> LINKS;
     private final ZoneProcessor PROCESSOR;
 
-    ZoneSession(ZoneCoordinate zc, GameZone gz) {
+    ZoneSession(GameZone gz, ZoneCoordinate zc) {
         COORD = zc;
         LINKS = new ArrayList<>();
         PROCESSOR = new ZoneProcessor(gz);

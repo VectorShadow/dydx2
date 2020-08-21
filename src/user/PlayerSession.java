@@ -13,8 +13,12 @@ public class PlayerSession {
 
     private static AccountMetadata accountMetadata = null;
 
+    private static ZoneKnowledge zoneKnowledge = null;
+
     public static GameActor getActor() {
-        return currentActorID < 0 ? null : (GameActor)GameZone.frontEnd.getActorMap().get(currentActorID);
+        return (currentActorID < 0 || zoneKnowledge == null)
+                ? null
+                : (GameActor)zoneKnowledge.getGameZone().getActorMap().get(currentActorID);
     }
 
     public static AccountMetadata getAccountMetadata() {
@@ -33,6 +37,10 @@ public class PlayerSession {
         return accountMetadata.AVATAR_METADATA.get(currentAvatarIndex);
     }
 
+    public static ZoneKnowledge getZoneKnowledge() {
+        return zoneKnowledge;
+    }
+
     public static void setAccountMetadata(AccountMetadata metadata) {
         accountMetadata = metadata;
     }
@@ -43,5 +51,9 @@ public class PlayerSession {
 
     public static void setAvatarIndex(int avatarIndex) {
         currentAvatarIndex = avatarIndex;
+    }
+
+    public static void setZoneKnowledge(ZoneKnowledge zk) {
+        zoneKnowledge = zk;
     }
 }

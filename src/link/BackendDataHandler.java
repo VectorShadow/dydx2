@@ -7,8 +7,10 @@ import main.LiveLog;
 import main.LogHub;
 import user.UserAccount;
 import user.UserAccountManager;
+import user.ZoneKnowledge;
 
 import static link.instructions.LogInResponseInstructionDatum.*;
+import static main.LiveLog.LogEntryPriority.WARNING;
 import static user.UserAccountManager.*;
 
 public class BackendDataHandler extends DataHandler {
@@ -95,7 +97,11 @@ public class BackendDataHandler extends DataHandler {
             else
                 DefinitionsManager.getOrderExecutor().setOrder(responseLink, otid.ORDER);
         } else if (instructionDatum instanceof ReportChecksumMismatchInstructionDatum) {
-            responseLink.transmit(new GameZoneInstructionDatum(Engine.getInstance().getGameZone(responseLink)));
+            responseLink.transmit(
+                    new ZoneKnowledgeInstructionDatum(
+                            Engine.getInstance().getZoneKnowledge(responseLink)
+                    )
+            );
         } else if (instructionDatum instanceof SelectAvatarInstructionData) {
             int avatarIndex = ((SelectAvatarInstructionData)instructionDatum).AVATAR_INDEX;
             loggedInAccount = Engine.getInstance().getUserAccount(responseLink);
@@ -121,6 +127,17 @@ public class BackendDataHandler extends DataHandler {
                             avatarIndex
                     )
             );
+        } else if (instructionDatum instanceof UpdatePlayerMemoryInstructionDatum){
+            UpdatePlayerMemoryInstructionDatum upmid = (UpdatePlayerMemoryInstructionDatum)instructionDatum;
+            ZoneKnowledge zk = Engine.getInstance().getZoneKnowledge(responseLink);
+            if (upmid.FEATURE)
+                zk.revealFeatures(upmid.UPDATES);
+            else
+                zk.rememberTiles(upmid.UPDATES);
+            if (zk.getMemoryChecksum() != upmid.CHECKSUM) {
+                LiveLog.log("Memory update checksum validation failed! Sending updated ZoneKnowledge.", WARNING);
+                responseLink.transmit(new ZoneKnowledgeInstructionDatum(zk));
+            }
         }
     }
 }

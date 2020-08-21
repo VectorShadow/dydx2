@@ -6,11 +6,11 @@ import gamestate.gamezone.GameZone;
 import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gamezone.GameZoneUpdate;
 import link.DataLink;
-import link.RemoteDataLink;
-import link.instructions.GameZoneInstructionDatum;
+import link.instructions.ZoneKnowledgeInstructionDatum;
 import link.instructions.GameZoneUpdateInstructionDatum;
 import user.UserAccount;
 import user.UserAvatar;
+import user.ZoneKnowledge;
 
 import java.util.ArrayList;
 
@@ -43,11 +43,11 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
      * This should only be done after querying the ZoneCoordinate via contains(), finding no existing ZoneProcessor,
      * and requesting a Zone be generated for that coordinate.
      * @param dl the DataLink connecting to the new Zone.
-     * @param gz the newly generated GameZone.
+     * @param gz the GameZone to be processed.
      * @param zc the ZoneCoordinate of the GameZone.
      */
     public void addZoneProcessor(DataLink dl, GameZone gz, ZoneCoordinate zc) {
-        ZoneSession zs = new ZoneSession(zc, gz);
+        ZoneSession zs = new ZoneSession(gz, zc);
         DataLinkSession dls = get(dl);
         dls.zoneSession = zs;
         zs.LINKS.add(dls);
@@ -107,18 +107,27 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         UserAccount ua = dls.userAccount;
         ua.setCurrentAvatar(userAvatarIndex);
         UserAvatar userAvatar = ua.getCurrentAvatar();
+        GameZone gz;
         ZoneCoordinate zc = userAvatar.getAt();
         ZoneSession zs = get(zc);
-        GameZone gz;
-        if (zs == null) {
-            gz = DefinitionsManager.generateZone(zc);
+        ZoneKnowledge zk = userAvatar.getZoneKnowledge();
+        if (zs == null) { //no zone session is currently processing a zone corresponding to the desired zone coordinates
+            if (zk == null) { //the avatar has no zone knowledge
+                gz = DefinitionsManager.generateZone(zc); //generate a new zone for those coordinates
+                zk = new ZoneKnowledge(gz); //generate a new zone knowledge object based on that zone
+                userAvatar.setZoneKnowledge(zk); //then update the avatar's zone knowledge accordingly
+            } else
+                gz = zk.getGameZone(); //restore the game zone from the avatar's memory
             //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
-            dataLink.transmit(new GameZoneInstructionDatum(gz));
+            dataLink.transmit(new ZoneKnowledgeInstructionDatum(zk));
             addZoneProcessor(dataLink, gz, zc);
-        } else {
+        } else { //a zone session corresponding to the desired coordinates is already being processed
+            gz = zs.getGameZone(); //load the existing gamezone
+            if (zk != null) //the avatar has existing zone knowledge
+                zk = zk.preserveKnowledge(gz); //attempt to preserve this avatar's knowledge of it
+            userAvatar.setZoneKnowledge(zk); //update the avatar's knowledge to the new game zone state
             //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
-            gz = zs.getGameZone();
-            dataLink.transmit(new GameZoneInstructionDatum(gz));
+            dataLink.transmit(new ZoneKnowledgeInstructionDatum(zk));
             connect(dataLink, zc);
         }
         GameActor userActor = userAvatar.getActor();
@@ -137,7 +146,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
     }
 
     /**
-     * Disconnect a DataLinkSession to a ZoneSession when a user releases their avatar.
+     * Disconnect a DataLinkSession from a ZoneSession when a user releases their avatar.
      */
     void disconnectLinkFromZone(DataLink dataLink) {
         DataLinkSession dls = get(dataLink);
