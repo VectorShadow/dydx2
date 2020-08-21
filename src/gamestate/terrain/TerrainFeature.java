@@ -7,5 +7,6 @@ import java.io.Serializable;
  * Implementations should extend this, defining fields according to their needs.
  */
 public interface TerrainFeature extends Serializable {
+    boolean isAutoTriggered();
     boolean isHidden();
 }

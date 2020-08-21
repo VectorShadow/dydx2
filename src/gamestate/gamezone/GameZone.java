@@ -1,5 +1,6 @@
 package gamestate.gamezone;
 
+import definitions.DefinitionsManager;
 import gamestate.TransmittableGameAsset;
 import gamestate.coordinates.PointCoordinate;
 import gamestate.coordinates.Coordinate;
@@ -164,7 +165,8 @@ public class GameZone extends TransmittableGameAsset {
         moveMobileGameObject(lookupProjectile(serialID), pc);
     }
     private void moveMobileGameObject(MobileGameObject mgo, PointCoordinate pc) {
-        TerrainTile source = tileAt(mgo.getAt().getParentTileCoordinate());
+        Coordinate destinationTileCoordinate = pc.getParentTileCoordinate();
+        TerrainTile source = tileAt(destinationTileCoordinate);
         TerrainTile destination = tileAt(pc.getParentTileCoordinate());
         boolean isProjectile = mgo instanceof GameProjectile;
         //indirect projectiles are not tracked by terrain tiles.
@@ -179,6 +181,20 @@ public class GameZone extends TransmittableGameAsset {
             destinationTracker.add(mgo);
         }
         mgo.setAt(pc);
+        //finally, if we enter a terrain tile that has an automatically triggered feature, handle that interaction
+        if (
+                mgo instanceof GameActor &&
+                        destination.terrainFeature != null &&
+                        destination.terrainFeature.isAutoTriggered()
+        )
+            DefinitionsManager.
+                    getFeatureHandler().
+                    interact(
+                            (GameActor)mgo,
+                            destinationTileCoordinate,
+                            this,
+                            destination.terrainFeature
+                    );
     }
 
     /**
