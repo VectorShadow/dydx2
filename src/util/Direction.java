@@ -50,4 +50,27 @@ public enum Direction {
     public boolean isDiagonal() {
         return ROW_CHANGE != 0 && COL_CHANGE != 0;
     }
+
+    /**
+     * Convert a facing measured in radians to a direction.
+     * Note that this is opposite a typical unit circle, since our positive Y coordinates are below the X axis,
+     * not above it as in the case of the unit circle.
+     */
+    public static Direction toDirection(double radians) {
+        double adjustedRadians = radians + (Math.PI / 8.0);
+        while (adjustedRadians >= Math.PI * 2.0)
+            adjustedRadians -= Math.PI * 2.0;
+        int directionIndex = (int)Math.floor((adjustedRadians / (Math.PI / 4.0)));
+        switch (directionIndex) {
+            case 0: return EAST;
+            case 1: return SOUTH_EAST;
+            case 2: return SOUTH;
+            case 3: return SOUTH_WEST;
+            case 4: return WEST;
+            case 5: return NORTH_WEST;
+            case 6: return NORTH;
+            case 7: return NORTH_EAST;
+            default: throw new IllegalStateException("Unhandled index: " + directionIndex);
+        }
+    }
 }
