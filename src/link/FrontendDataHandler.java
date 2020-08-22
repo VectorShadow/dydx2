@@ -23,16 +23,18 @@ public class FrontendDataHandler extends DataHandler {
 
     @Override
     protected void handle(InstructionDatum instructionDatum, DataLink responseLink) {
-        if (instructionDatum instanceof ZoneKnowledgeInstructionDatum) {
-            PlayerSession.setZoneKnowledge(((ZoneKnowledgeInstructionDatum)instructionDatum).ZONE_KNOWLEDGE);
+        if (instructionDatum instanceof GameZoneTransmissionInstructionDatum) {
+            GameZoneTransmissionInstructionDatum gztid = (GameZoneTransmissionInstructionDatum)instructionDatum;
+            PlayerSession.setGameZone(gztid.GAMEZONE);
+            PlayerSession.setZoneKnowledge(gztid.ZONE_KNOWLEDGE);
             DefinitionsManager.getGameZoneUpdateListener().changeGameZone();
             LiveLog.log("Loaded new gameZone on frontend.", INFO);
         } else if (instructionDatum instanceof GameZoneUpdateInstructionDatum) {
             GameZoneUpdateInstructionDatum gzuid = ((GameZoneUpdateInstructionDatum) instructionDatum);
             for (GameZoneUpdate gzu : gzuid.UPDATE_LIST)
-                PlayerSession.getZoneKnowledge().getGameZone().apply(gzu);
+                PlayerSession.getGameZone().apply(gzu);
             DefinitionsManager.getGameZoneUpdateListener().updateGameZone();
-            if (PlayerSession.getZoneKnowledge().getGameZone().getCheckSum() != gzuid.UPDATE_CHECKSUM) {
+            if (PlayerSession.getGameZone().getCheckSum() != gzuid.UPDATE_CHECKSUM) {
                 responseLink.transmit(new ReportChecksumMismatchInstructionDatum());
                 LiveLog.log("Game update checksum validation failed! Requesting updated game zone.", WARNING);
             }
@@ -65,6 +67,10 @@ public class FrontendDataHandler extends DataHandler {
             PlayerSession.setAccountMetadata(iaaaid.ACCOUNT_METADATA);
             PlayerSession.setActorID(iaaaid.ACTOR_ID);
             PlayerSession.setAvatarIndex(iaaaid.AVATAR_INDEX);
+        } else if (instructionDatum instanceof ZoneKnowledgeInstructionDatum) {
+            PlayerSession.setZoneKnowledge(((ZoneKnowledgeInstructionDatum)instructionDatum).ZONE_KNOWLEDGE);
+            DefinitionsManager.getGameZoneUpdateListener().changeGameZone();
+            LiveLog.log("Updated zone knowledge on front end.", INFO);
         } else {
                 //todo - more cases
                 throw new IllegalArgumentException("Unhandled InstructionDatum class: " + instructionDatum.getClass());

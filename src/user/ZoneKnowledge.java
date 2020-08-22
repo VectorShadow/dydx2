@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class ZoneKnowledge extends TransmittableGameAsset {
 
 
-    private final GameZone GAME_ZONE;
+    private final int GAME_ZONE_SERIAL_ID;
     private final int ZONE_COLUMNS;
     private final int ZONE_ROWS;
 
@@ -21,9 +21,9 @@ public class ZoneKnowledge extends TransmittableGameAsset {
     private int memoryChecksum = 0;
 
     public ZoneKnowledge(GameZone gameZone) {
-        GAME_ZONE = gameZone;
-        ZONE_COLUMNS = GAME_ZONE.countColumns();
-        ZONE_ROWS = GAME_ZONE.countRows();
+        GAME_ZONE_SERIAL_ID = gameZone.getSerialID();
+        ZONE_COLUMNS = gameZone.countColumns();
+        ZONE_ROWS = gameZone.countRows();
         rememberedTiles = new boolean[ZONE_ROWS][ZONE_COLUMNS];
         revealedFeatures = new boolean[ZONE_ROWS][ZONE_COLUMNS];
         for (int r = 0; r < ZONE_ROWS; ++r) {
@@ -38,15 +38,19 @@ public class ZoneKnowledge extends TransmittableGameAsset {
         return memoryChecksum;
     }
 
-    public GameZone getGameZone() {
-        return GAME_ZONE;
+    public int getGameZoneSerialID() {
+        return GAME_ZONE_SERIAL_ID;
     }
 
     /**
      * Check whether a coordinate is within the game zone.
      */
     public boolean isInBounds(Coordinate coordinate) {
-        return GAME_ZONE.contains(coordinate);
+        return
+                coordinate.ROW >= 0 &&
+                        coordinate.COLUMN >= 0 &&
+                        coordinate.ROW < ZONE_ROWS &&
+                        coordinate.COLUMN < ZONE_COLUMNS;
     }
 
     /**
@@ -59,8 +63,8 @@ public class ZoneKnowledge extends TransmittableGameAsset {
     /**
      * Check whether terrain features at a coordinate have been revealed.
      */
-    public boolean isRevealed(Coordinate coordinate) {
-        TerrainFeature terrainFeature= GAME_ZONE.tileAt(coordinate).terrainFeature;
+    public boolean isRevealed(Coordinate coordinate, GameZone gameZone) {
+        TerrainFeature terrainFeature= gameZone.tileAt(coordinate).terrainFeature;
         return
                 isInBounds(coordinate) &&
                         terrainFeature != null &&
@@ -79,7 +83,7 @@ public class ZoneKnowledge extends TransmittableGameAsset {
      */
     public ZoneKnowledge preserveKnowledge(GameZone gameZone) {
         ZoneKnowledge zk = new ZoneKnowledge(gameZone);
-        if (GAME_ZONE.equals(gameZone)) {
+        if (GAME_ZONE_SERIAL_ID == gameZone.getSerialID()) {
             zk.rememberedTiles = rememberedTiles;
             zk.revealedFeatures = revealedFeatures;
         }

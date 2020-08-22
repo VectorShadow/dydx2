@@ -13,12 +13,14 @@ public class PlayerSession {
 
     private static AccountMetadata accountMetadata = null;
 
+    private static GameZone gameZone = null;
+
     private static ZoneKnowledge zoneKnowledge = null;
 
     public static GameActor getActor() {
-        return (currentActorID < 0 || zoneKnowledge == null)
+        return (currentActorID < 0 || gameZone == null)
                 ? null
-                : (GameActor)zoneKnowledge.getGameZone().getActorMap().get(currentActorID);
+                : (GameActor)gameZone.getActorMap().get(currentActorID);
     }
 
     public static AccountMetadata getAccountMetadata() {
@@ -37,6 +39,10 @@ public class PlayerSession {
         return accountMetadata.AVATAR_METADATA.get(currentAvatarIndex);
     }
 
+    public static GameZone getGameZone() {
+        return gameZone;
+    }
+
     public static ZoneKnowledge getZoneKnowledge() {
         return zoneKnowledge;
     }
@@ -53,6 +59,9 @@ public class PlayerSession {
         currentAvatarIndex = avatarIndex;
     }
 
+    public static void setGameZone(GameZone gz) {
+        gameZone = gz;
+    }
     public static void setZoneKnowledge(ZoneKnowledge zk) {
         zoneKnowledge = zk;
     }

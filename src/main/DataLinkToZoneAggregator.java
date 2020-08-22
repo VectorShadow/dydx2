@@ -6,6 +6,7 @@ import gamestate.gamezone.GameZone;
 import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gamezone.GameZoneUpdate;
 import link.DataLink;
+import link.instructions.GameZoneTransmissionInstructionDatum;
 import link.instructions.ZoneKnowledgeInstructionDatum;
 import link.instructions.GameZoneUpdateInstructionDatum;
 import user.UserAccount;
@@ -112,22 +113,19 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         ZoneSession zs = get(zc);
         ZoneKnowledge zk = userAvatar.getZoneKnowledge();
         if (zs == null) { //no zone session is currently processing a zone corresponding to the desired zone coordinates
-            if (zk == null) { //the avatar has no zone knowledge
-                gz = DefinitionsManager.generateZone(zc); //generate a new zone for those coordinates
-                zk = new ZoneKnowledge(gz); //generate a new zone knowledge object based on that zone
-                userAvatar.setZoneKnowledge(zk); //then update the avatar's zone knowledge accordingly
-            } else
-                gz = zk.getGameZone(); //restore the game zone from the avatar's memory
+            gz = DefinitionsManager.generateZone(zc); //generate a new zone for those coordinates
+            zk = zk.preserveKnowledge(gz); //attempt to preserve this avatar's zone knowledge if applicable
+            userAvatar.setZoneKnowledge(zk); //then update the avatar's zone knowledge accordingly
             //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
-            dataLink.transmit(new ZoneKnowledgeInstructionDatum(zk));
+            dataLink.transmit(new GameZoneTransmissionInstructionDatum(gz, zk));
             addZoneProcessor(dataLink, gz, zc);
         } else { //a zone session corresponding to the desired coordinates is already being processed
             gz = zs.getGameZone(); //load the existing gamezone
             if (zk != null) //the avatar has existing zone knowledge
-                zk = zk.preserveKnowledge(gz); //attempt to preserve this avatar's knowledge of it
+                zk = zk.preserveKnowledge(gz); //attempt to preserve this avatar's knowledge of it if applicable
             userAvatar.setZoneKnowledge(zk); //update the avatar's knowledge to the new game zone state
             //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
-            dataLink.transmit(new ZoneKnowledgeInstructionDatum(zk));
+            dataLink.transmit(new GameZoneTransmissionInstructionDatum(gz, zk));
             connect(dataLink, zc);
         }
         GameActor userActor = userAvatar.getActor();

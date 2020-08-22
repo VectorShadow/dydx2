@@ -15,6 +15,8 @@ public abstract class UserAvatar implements Serializable {
 
     protected ZoneCoordinate at = ZoneCoordinate.ORIGIN_ZONE;
 
+    //todo - saving this causes EOF errors somehow(probably related to GameZone - similar issues when actors carried
+    // that field). Look into!
     private ZoneKnowledge zoneKnowledge = null;
 
     /**
