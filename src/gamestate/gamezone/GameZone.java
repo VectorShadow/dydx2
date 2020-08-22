@@ -227,6 +227,7 @@ public class GameZone extends SerialGameObject {
             throw new IllegalStateException("Removed actor not found within the zone's actor list.");
         if (ACTOR_MAP.remove(serialID) == null)
             throw new IllegalStateException("Removed actor not found within the zone's actor map.");
+        ga.setAt(null); //de-locate this actor
     }
 
     /**

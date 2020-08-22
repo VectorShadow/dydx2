@@ -77,6 +77,10 @@ public class UserAccount implements Serializable {
         return AVATARS.get(currentAvatarIndex);
     }
 
+    public int getCurrentAvatarIndex() {
+        return currentAvatarIndex;
+    }
+
     public String getName() {
         return NAME;
     }

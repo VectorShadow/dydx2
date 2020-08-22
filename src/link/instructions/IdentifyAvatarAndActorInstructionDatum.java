@@ -7,12 +7,10 @@ import user.AccountMetadata;
  * This is how we inform the frontend which actor in its gamezone belongs to it.
  */
 public class IdentifyAvatarAndActorInstructionDatum extends InstructionDatum {
-    public final AccountMetadata ACCOUNT_METADATA;
     public final int ACTOR_ID;
     public final int AVATAR_INDEX;
 
-    public IdentifyAvatarAndActorInstructionDatum(AccountMetadata accountMetadata, int actorID, int avatarIndex) {
-        ACCOUNT_METADATA = accountMetadata;
+    public IdentifyAvatarAndActorInstructionDatum(int actorID, int avatarIndex) {
         ACTOR_ID = actorID;
         AVATAR_INDEX = avatarIndex;
     }

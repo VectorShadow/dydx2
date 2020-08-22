@@ -1,6 +1,7 @@
 package link;
 
 import definitions.DefinitionsManager;
+import gamestate.order.TravelOrder;
 import link.instructions.*;
 import main.Engine;
 import main.LiveLog;
@@ -94,6 +95,8 @@ public class BackendDataHandler extends DataHandler {
             OrderTransmissionInstructionDatum otid = (OrderTransmissionInstructionDatum)instructionDatum;
             if (otid.ORDER == null)
                 DefinitionsManager.getOrderExecutor().clearOrder(responseLink, otid.ORDER_CLASS);
+            else if (otid.ORDER instanceof TravelOrder)
+                DefinitionsManager.getTravelMap().changeZone(responseLink);
             else
                 DefinitionsManager.getOrderExecutor().setOrder(responseLink, otid.ORDER);
         } else if (instructionDatum instanceof ReportChecksumMismatchInstructionDatum) {
@@ -119,10 +122,15 @@ public class BackendDataHandler extends DataHandler {
             }
             //Here, engine selects the specified avatar from its account, then places an appropriate actor in its gamezone
             int actorID = Engine.getInstance().connectUserAvatar(responseLink, avatarIndex);
+            //update the frontend's metadata
+            responseLink.transmit(
+                    new UpdateMetaDataInstructionDatum(
+                            loggedInAccount.buildMetadata()
+                    )
+            );
             //finally, send the frontend a datum specifying which actor serial ID in its gamezone belongs to it
             responseLink.transmit(
                     new IdentifyAvatarAndActorInstructionDatum(
-                            loggedInAccount.buildMetadata(),
                             actorID,
                             avatarIndex
                     )

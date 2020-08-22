@@ -82,7 +82,7 @@ public class Pathfinder {
                                 direction
                                 : direction > Math.PI ?
                                 direction - Math.PI
-                                : Math.PI - direction
+                                : direction + Math.PI
                 );
         PointCoordinate pathPoint;
         TerrainTile terrainTile;

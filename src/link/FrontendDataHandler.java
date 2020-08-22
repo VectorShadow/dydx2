@@ -64,9 +64,10 @@ public class FrontendDataHandler extends DataHandler {
             System.exit(0); //proper logout
         } else if (instructionDatum instanceof IdentifyAvatarAndActorInstructionDatum) {
             IdentifyAvatarAndActorInstructionDatum iaaaid = (IdentifyAvatarAndActorInstructionDatum)instructionDatum;
-            PlayerSession.setAccountMetadata(iaaaid.ACCOUNT_METADATA);
             PlayerSession.setActorID(iaaaid.ACTOR_ID);
             PlayerSession.setAvatarIndex(iaaaid.AVATAR_INDEX);
+        } else if (instructionDatum instanceof UpdateMetaDataInstructionDatum) {
+            PlayerSession.setAccountMetadata(((UpdateMetaDataInstructionDatum)instructionDatum).ACCOUNT_METADATA);
         } else if (instructionDatum instanceof ZoneKnowledgeInstructionDatum) {
             PlayerSession.setZoneKnowledge(((ZoneKnowledgeInstructionDatum)instructionDatum).ZONE_KNOWLEDGE);
             DefinitionsManager.getGameZoneUpdateListener().changeGameZone();

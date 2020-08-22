@@ -2,6 +2,8 @@ package main;
 
 import gamestate.gamezone.GameZone;
 import link.DataLink;
+import link.instructions.IdentifyAvatarAndActorInstructionDatum;
+import link.instructions.UpdateMetaDataInstructionDatum;
 import user.UserAccount;
 import user.UserAvatar;
 import user.ZoneKnowledge;
@@ -144,6 +146,10 @@ public class Engine extends Thread {
         //todo - other audit functions?
     }
 
+    public void changeZones(DataLink dataLink) {
+        LINK_TO_ZONE_AGGREGATOR.transferLinkToNewZone(dataLink);
+    }
+
     /**
      * On login: associate a data link with a user account and track the user account.
      */
@@ -179,6 +185,13 @@ public class Engine extends Thread {
      */
     public boolean isConnected(UserAccount userAccount) {
         return LINK_TO_ZONE_AGGREGATOR.isTrackingUser(userAccount);
+    }
+
+    /**
+     * Access the game zone to which the specified data link is connected.
+     */
+    public GameZone getGameZone(DataLink dataLink) {
+        return LINK_TO_ZONE_AGGREGATOR.get(dataLink).zoneSession.getGameZone();
     }
 
     /**

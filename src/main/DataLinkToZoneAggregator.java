@@ -7,6 +7,7 @@ import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gamezone.GameZoneUpdate;
 import link.DataLink;
 import link.instructions.GameZoneTransmissionInstructionDatum;
+import link.instructions.UpdateMetaDataInstructionDatum;
 import link.instructions.ZoneKnowledgeInstructionDatum;
 import link.instructions.GameZoneUpdateInstructionDatum;
 import user.UserAccount;
@@ -114,7 +115,10 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         ZoneKnowledge zk = userAvatar.getZoneKnowledge();
         if (zs == null) { //no zone session is currently processing a zone corresponding to the desired zone coordinates
             gz = DefinitionsManager.generateZone(zc); //generate a new zone for those coordinates
-            zk = zk.preserveKnowledge(gz); //attempt to preserve this avatar's zone knowledge if applicable
+            zk =
+                    zk == null //check whether zone knowledge exists
+                            ? new ZoneKnowledge(gz) //if not, generate it, otherwise
+                            : zk.preserveKnowledge(gz); //attempt to preserve this avatar's zone knowledge if applicable
             userAvatar.setZoneKnowledge(zk); //then update the avatar's zone knowledge accordingly
             //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
             dataLink.transmit(new GameZoneTransmissionInstructionDatum(gz, zk));
@@ -157,6 +161,16 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
                 )
         ); //no need to transmit this update since the link is being disconnected
         dls.zoneSession = null;
+    }
+
+    /**
+     * Transfer a link from one ZoneProcessor to another
+     */
+    void transferLinkToNewZone(DataLink dataLink) {
+        disconnectLinkFromZone(dataLink);
+        DataLinkSession dls = get(dataLink);
+        dataLink.transmit(new UpdateMetaDataInstructionDatum(dls.userAccount.buildMetadata()));
+        connectLinkToZone(dataLink, dls.userAccount.getCurrentAvatarIndex());
     }
 
     void processAll() {

@@ -1,5 +1,7 @@
 package gamestate.terrain;
 
+import util.Direction;
+
 /**
  * This class specifies the engine level properties of a terrain tile.
  * These are associated with the unique terrain ID field of the terrain tile, and must be defined
@@ -77,23 +79,17 @@ public abstract class TerrainProperties {
     /**
      * This value indicates a terrain feature which does not permit any sort of travel.
      */
-    public static final int TRAVEL_PERMISSION_NONE = 0;
+    public static final int TRAVEL_PERMISSION_NONE = Direction.SELF.ordinal();
 
     /**
      * This value indicates a terrain feature which permits travel to a deeper level within the current location.
      */
-    public static final int TRAVEL_PERMISSION_DOWN = 1;
+    public static final int TRAVEL_PERMISSION_DOWN = Direction.SELF.ordinal() + 1;
 
     /**
      * This value indicates a terrain feature which permits travel to a shallower level within the current location.
      */
-    public static final int TRAVEL_PERMISSION_UP = 2;
-
-    /**
-     * This value indicates a terrain feature which permits travel to a different location.
-     */
-    //todo - probably a definition which links locations via these travel actions
-    public static final int TRAVEL_PERMISSION_NEW_ZONE = 3;
+    public static final int TRAVEL_PERMISSION_UP = Direction.SELF.ordinal() + 2;
 
     /**
      * This value indicates how vision and energy based projectiles are affected upon reaching this terrain.
@@ -110,11 +106,24 @@ public abstract class TerrainProperties {
      */
     public final int MATTER_PERMISSION;
 
+    /**
+     * This value indicates whether the terrain permits travel to a different Zone.
+     * Values of 0-7 correspond to Direction value ordinals, used to change location ID.
+     * A value of 8 corresponds to Direction.SELF, indicating no travel permission.
+     * Values of 9 and 10 correspond to down and up travel permissions, used to change depth.
+     */
     public final int TRAVEL_PERMISSION;
     
     public TerrainProperties(int energyPermission, int matterPermission, int travelPermission) {
         ENERGY_PERMISSION = energyPermission;
         MATTER_PERMISSION = matterPermission;
         TRAVEL_PERMISSION = travelPermission;
+    }
+
+    public Direction travelDirection() {
+        if (TRAVEL_PERMISSION >= Direction.SELF.ordinal()) return null;
+        for (Direction direction : Direction.values())
+            if (direction.ordinal() == TRAVEL_PERMISSION) return direction;
+        throw new IllegalStateException("Unhandeld Travel Permission value: " + TRAVEL_PERMISSION);
     }
 }
