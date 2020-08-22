@@ -32,13 +32,19 @@ public class Coordinate extends TransmittableGameAsset {
         this(coordinate.COLUMN + direction.COL_CHANGE, coordinate.ROW + direction.ROW_CHANGE);
     }
 
+    public double distanceTo(Coordinate c) {
+        int dc = c.COLUMN - COLUMN;
+        int dr = c.ROW - ROW;
+        return Math.sqrt((double)(dc * dc) + (double)(dr * dr));
+    }
+
     @Override
     public boolean equals(Object o) {
         return o instanceof Coordinate && COLUMN == ((Coordinate)o).COLUMN && ROW == ((Coordinate)o).ROW;
     }
 
     public boolean isAdjacentTo(Coordinate c) {
-        return Math.abs(c.ROW - ROW) < 2 && Math.abs(c.COLUMN - COLUMN) < 2;
+        return distanceTo(c) <= Math.sqrt(2.0);
     }
 
     @Override

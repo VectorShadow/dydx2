@@ -14,6 +14,7 @@ public class DefinitionsManager {
     private static LoginResponseHandler loginResponseHandler = null;
     private static OrderExecutor orderExecutor = null;
     private static TerrainLookup terrainLookup = null;
+    private static TravelMap travelMap = null;
 
     public static void loadDefinitions(
             AvatarManager am,
@@ -22,7 +23,8 @@ public class DefinitionsManager {
             GameZoneUpdateListener gzul,
             LoginResponseHandler lrh,
             OrderExecutor oe,
-            TerrainLookup tl
+            TerrainLookup tl,
+            TravelMap tm
     ) {
         avatarManager = am;
         featureHandler = fh;
@@ -31,6 +33,7 @@ public class DefinitionsManager {
         loginResponseHandler = lrh;
         orderExecutor = oe;
         terrainLookup = tl;
+        travelMap = tm;
     }
 
     public static GameZone generateZone(ZoneCoordinate zc) {
@@ -59,5 +62,9 @@ public class DefinitionsManager {
 
     public static TerrainLookup getTerrainLookup() {
         return terrainLookup;
+    }
+
+    public static TravelMap getTravelMap() {
+        return travelMap;
     }
 }
