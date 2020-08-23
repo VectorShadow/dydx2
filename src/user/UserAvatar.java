@@ -1,5 +1,6 @@
 package user;
 
+import gamestate.coordinates.PointCoordinate;
 import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gameobject.GameActor;
 
@@ -15,14 +16,19 @@ public abstract class UserAvatar implements Serializable {
 
     protected ZoneCoordinate at = ZoneCoordinate.ORIGIN_ZONE;
 
-    //todo - saving this causes EOF errors somehow(probably related to GameZone - similar issues when actors carried
-    // that field). Look into!
+    private PointCoordinate lastActorLocation = null;
+
     private ZoneKnowledge zoneKnowledge = null;
 
     /**
      * Generate an AvatarMetadata object based on this avatar.
      */
     abstract AvatarMetadata buildMetadata();
+
+    /**
+     * Dynamically generate an actor, or select a pre-generated actor, based on implementation.
+     */
+    protected abstract void createActor();
 
     /**
      * Get the current actor in use by this Avatar.
@@ -35,17 +41,28 @@ public abstract class UserAvatar implements Serializable {
         return actor;
     }
 
-    /**
-     * Dynamically generate an actor, or select a pre-generated actor, based on implementation.
-     */
-    protected abstract void createActor();
-
     public ZoneCoordinate getAt() {
         return at;
     }
 
     public ZoneKnowledge getZoneKnowledge() {
         return zoneKnowledge;
+    }
+
+    /**
+     * Restore the current actor's location once we log back in.
+     */
+    public void restoreLastActorLocation() {
+        if (actor != null)
+            actor.setAt(lastActorLocation);
+    }
+
+    /**
+     * Backup the current actor's location, before it is removed from a zone and cleared on logout.
+     */
+    public void saveLastActorLocation() {
+        if (actor != null)
+            lastActorLocation = actor.getAt();
     }
 
     public void setActor(GameActor actor) {

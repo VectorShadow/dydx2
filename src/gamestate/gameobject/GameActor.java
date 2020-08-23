@@ -14,10 +14,16 @@ import java.util.ArrayList;
  */
 public abstract class GameActor extends MobileGameObject {
 
+    private static int serialCount = 1;
+
     protected MovementOrder movementOrder = null;
     protected RotationOrder rotationOrder = null;
 
-    private static int serialCount = 1;
+    private int travelFlag = -1;
+
+    public int getTravelFlag() {
+        return travelFlag;
+    }
 
     @Override
     public boolean isMaterial() {
@@ -63,6 +69,10 @@ public abstract class GameActor extends MobileGameObject {
             return false;
         rotationOrder = ro;
         return true;
+    }
+
+    public void setTravelFlag(int outboundTravelPermission) {
+        travelFlag = outboundTravelPermission;
     }
 
 }

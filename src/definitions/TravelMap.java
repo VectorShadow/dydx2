@@ -1,6 +1,5 @@
 package definitions;
 
-import gamestate.coordinates.Coordinate;
 import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gameobject.GameActor;
 import gamestate.gamezone.GameZone;
@@ -16,9 +15,29 @@ import util.Direction;
  * and how to handle instances.
  */
 public abstract class TravelMap {
-    public abstract ZoneCoordinate travel(Direction direction, ZoneCoordinate origin);
+
+    /**
+     * Attempt to travel to a lower depth within an existing zone location.
+     */
     public abstract ZoneCoordinate climbDown(ZoneCoordinate origin);
+
+
+    /**
+     * Attempt to travel to a higher depth within an existing zone location.
+     */
     public abstract ZoneCoordinate climbUp(ZoneCoordinate origin);
+
+
+    /**
+     * Return whether the specified ZoneCoordinate corresponds to a pre-defined, static map or not.
+     */
+    public abstract boolean isStaticLocation(ZoneCoordinate zoneCoordinate);
+
+
+    /**
+     * Attempt to travel to a different location in the specified direction.
+     */
+    public abstract ZoneCoordinate travel(Direction direction, ZoneCoordinate origin);
 
     /**
      * Attempt to change the zone of the avatar on the specified link.
@@ -47,7 +66,9 @@ public abstract class TravelMap {
                         : travel(terrainProperties.travelDirection(), originZoneCoordinate);
         if (destinationZoneCoordinate == null || destinationZoneCoordinate .equals(originZoneCoordinate))
             throw new IllegalStateException("Failed to determine valid destination.");
-        playerAvatar.setAt(destinationZoneCoordinate);
+        playerActor.setTravelFlag(terrainProperties.TRAVEL_PERMISSION); //set the actor's travel flag so the new game zone can place it appropriately
+        playerAvatar.setAt(destinationZoneCoordinate); //re-locate the player's avatar to the new zone
+        playerAvatar.setZoneKnowledge(null); //clear any memory this avatar has of the current zone
         engine.changeZones(dataLink);
     }
 }

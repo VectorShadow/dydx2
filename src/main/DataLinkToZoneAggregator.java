@@ -113,26 +113,24 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         ZoneCoordinate zc = userAvatar.getAt();
         ZoneSession zs = get(zc);
         ZoneKnowledge zk = userAvatar.getZoneKnowledge();
-        if (zs == null) { //no zone session is currently processing a zone corresponding to the desired zone coordinates
-            gz = DefinitionsManager.generateZone(zc); //generate a new zone for those coordinates
-            zk =
-                    zk == null //check whether zone knowledge exists
-                            ? new ZoneKnowledge(gz) //if not, generate it, otherwise
-                            : zk.preserveKnowledge(gz); //attempt to preserve this avatar's zone knowledge if applicable
-            userAvatar.setZoneKnowledge(zk); //then update the avatar's zone knowledge accordingly
-            //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
-            dataLink.transmit(new GameZoneTransmissionInstructionDatum(gz, zk));
-            addZoneProcessor(dataLink, gz, zc);
-        } else { //a zone session corresponding to the desired coordinates is already being processed
-            gz = zs.getGameZone(); //load the existing gamezone
-            if (zk != null) //the avatar has existing zone knowledge
-                zk = zk.preserveKnowledge(gz); //attempt to preserve this avatar's knowledge of it if applicable
-            userAvatar.setZoneKnowledge(zk); //update the avatar's knowledge to the new game zone state
-            //transmit the gamezone before connecting, so the client is prepared to receive updates immediately
-            dataLink.transmit(new GameZoneTransmissionInstructionDatum(gz, zk));
-            connect(dataLink, zc);
-        }
+        //pull the game zone from the zone session if one exists, or create one if not
+        gz = zs == null ? DefinitionsManager.generateZone(zc) : zs.getGameZone();
         GameActor userActor = userAvatar.getActor();
+        if ( //attempt to preserve location and player position
+                zk != null && //if the player has any memory
+                        (DefinitionsManager.getTravelMap().isStaticLocation(zc) ||  //and either he is at a static location like a town
+                                zk.getGameZoneSerialID() == gz.getSerialID()) //or he is reconnecting to an existing game zone with the same serial ID as the last zone he was logged in to
+        ) {
+            zk.preserveKnowledge(gz); //preserve knowledge
+            userAvatar.restoreLastActorLocation(); //and restore position information
+        } else {
+            zk = new ZoneKnowledge(gz); //otherwise generate a new zone knowledge object, and let the zone place the actor
+        }
+        userAvatar.setZoneKnowledge(zk);
+        //we transmit the game zone before connecting to the processor, so the front end is ready for updates when they begin to arrive
+        dataLink.transmit(new GameZoneTransmissionInstructionDatum(gz, zk));
+        if (zs == null) addZoneProcessor(dataLink, gz, zc);
+        else connect(dataLink, zc);
         GameZoneUpdate addActor = new GameZoneUpdate("addActor", userActor);
         gz.apply(addActor);
         ArrayList<GameZoneUpdate> addActorAsList = new ArrayList<>();
@@ -154,6 +152,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         DataLinkSession dls = get(dataLink);
         if (dls.zoneSession == null) return; //no need to continue if this link never connected to a zone session
         dls.zoneSession.LINKS.remove(dls);
+        dls.userAccount.getCurrentAvatar().saveLastActorLocation();
         dls.zoneSession.getGameZone().apply( //remove the player's actor from the game zone
                 new GameZoneUpdate(
                         "removeActor",
@@ -168,6 +167,10 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
      */
     void transferLinkToNewZone(DataLink dataLink) {
         disconnectLinkFromZone(dataLink);
+        //since we are transferring zones, not fully disconnecting with the expectation that we might later reconnect
+        //to the same zone, we clear the avatar's memory of its actor's last position so that the new game zone can
+        //determine proper placement.
+        get(dataLink).userAccount.getCurrentAvatar().saveLastActorLocation();
         DataLinkSession dls = get(dataLink);
         dataLink.transmit(new UpdateMetaDataInstructionDatum(dls.userAccount.buildMetadata()));
         connectLinkToZone(dataLink, dls.userAccount.getCurrentAvatarIndex());

@@ -75,18 +75,12 @@ public class ZoneKnowledge extends TransmittableGameAsset {
     /**
      * Attempt to preserve existing knowledge of a game zone that may have been updated in an avatar's absence.
      * We use this when we re-load an avatar that has been disconnected and reconnects to an existing gamezone.
-     * If that gameZone equals the gamezone existing in the calling ZoneKnowledge object (that is, they have the same
-     * serial ID), we copy our existing remembered tiles and revealed features to the new knowledge containing the
-     * updated game zone.
-     * Note that this may occur incorrectly in the event of a server restart which would reset the serial creation
-     * counter, but in theory this occurence should be so infrequent as to not pose a problem.
+     * Note that checks should be made wherever this is called to determine whether it is appropriate to do this.
      */
     public ZoneKnowledge preserveKnowledge(GameZone gameZone) {
         ZoneKnowledge zk = new ZoneKnowledge(gameZone);
-        if (GAME_ZONE_SERIAL_ID == gameZone.getSerialID()) {
-            zk.rememberedTiles = rememberedTiles;
-            zk.revealedFeatures = revealedFeatures;
-        }
+        zk.rememberedTiles = rememberedTiles;
+        zk.revealedFeatures = revealedFeatures;
         return zk;
     }
 

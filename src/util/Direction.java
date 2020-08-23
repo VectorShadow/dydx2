@@ -47,6 +47,20 @@ public enum Direction {
             default: throw new IllegalStateException("Unhandled direction " + this);
         }
     }
+    public Direction reverse() {
+        switch (this) {
+            case SELF: return SELF;
+            case NORTH_WEST: return SOUTH_EAST;
+            case WEST: return EAST;
+            case SOUTH_WEST: return NORTH_EAST;
+            case SOUTH: return NORTH;
+            case SOUTH_EAST: return NORTH_WEST;
+            case EAST: return WEST;
+            case NORTH_EAST: return SOUTH_WEST;
+            case NORTH: return SOUTH;
+            default: throw new IllegalStateException("Unhandled direction " + this);
+        }
+    }
     public boolean isDiagonal() {
         return ROW_CHANGE != 0 && COL_CHANGE != 0;
     }

@@ -31,6 +31,11 @@ public class GameZone extends SerialGameObject {
     final int COLUMNS;
 
     /**
+     * Track all travel points in this gamezone.
+     */
+    final TravelPoints TRAVEL_POINTS = new TravelPoints();
+
+    /**
      * Define the terrain within the GameZone.
      */
     final TerrainTile[][] TERRAIN;
@@ -207,10 +212,17 @@ public class GameZone extends SerialGameObject {
      * @param gameActor
      */
     private void placeActor(GameActor gameActor){
-        //todo - for now, this is a hack. In the future, we should find a good way of doing this - spawn enemies in
-        // appropriate regions, player avatar actors at entrances or stairs/ramps, etc.
-        Coordinate centerTile = new Coordinate(COLUMNS / 2, ROWS / 2);
-        gameActor.setAt(PointCoordinate.centerOf(centerTile));
+        if (gameActor.getTravelFlag() >= 0) {
+            //if our actor travelled from somewhere else, find the appropriate travel point to place it at
+            gameActor.setAt(travelFrom(gameActor.getTravelFlag()));
+            //then clear the travel flag
+            gameActor.setTravelFlag(-1);
+        } else {
+            //todo - for now, this is a hack. In the future, we should find a good way of doing this - spawn enemies in
+            // appropriate regions
+            Coordinate centerTile = new Coordinate(COLUMNS / 2, ROWS / 2);
+            gameActor.setAt(PointCoordinate.centerOf(centerTile));
+        }
     }
 
     /**
@@ -322,5 +334,9 @@ public class GameZone extends SerialGameObject {
     @Override
     public boolean equals(Object o) {
         return o instanceof GameZone && ((GameZone) o).serialID == serialID;
+    }
+
+    public PointCoordinate travelFrom(int sourceTravelPermission) {
+        return PointCoordinate.centerOf(TRAVEL_POINTS.getEntryPointFrom(sourceTravelPermission));
     }
 }
