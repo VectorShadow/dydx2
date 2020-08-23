@@ -34,7 +34,7 @@ public class FrontendDataHandler extends DataHandler {
             for (GameZoneUpdate gzu : gzuid.UPDATE_LIST)
                 PlayerSession.getGameZone().apply(gzu);
             DefinitionsManager.getGameZoneUpdateListener().updateGameZone();
-            if (PlayerSession.getGameZone().getCheckSum() != gzuid.UPDATE_CHECKSUM) {
+            if (PlayerSession.getGameZone().getUpdateCheckSum() != gzuid.UPDATE_CHECKSUM) {
                 responseLink.transmit(new ReportChecksumMismatchInstructionDatum());
                 LiveLog.log("Game update checksum validation failed! Requesting updated game zone.", WARNING);
             }

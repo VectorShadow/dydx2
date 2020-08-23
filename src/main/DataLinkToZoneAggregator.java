@@ -7,8 +7,8 @@ import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gamezone.GameZoneUpdate;
 import link.DataLink;
 import link.instructions.GameZoneTransmissionInstructionDatum;
+import link.instructions.IdentifyAvatarAndActorInstructionDatum;
 import link.instructions.UpdateMetaDataInstructionDatum;
-import link.instructions.ZoneKnowledgeInstructionDatum;
 import link.instructions.GameZoneUpdateInstructionDatum;
 import user.UserAccount;
 import user.UserAvatar;
@@ -102,13 +102,14 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
 
     /**
      * Connect a DataLinkSession to a ZoneSession once a user has selected an avatar.
-     * @return the serialID of the actor associated with the connected account and avatar.
      */
-    int connectLinkToZone(DataLink dataLink, int userAvatarIndex) {
+    void connectLinkToZone(DataLink dataLink, int userAvatarIndex) {
         DataLinkSession dls = get(dataLink);
-        UserAccount ua = dls.userAccount;
-        ua.setCurrentAvatar(userAvatarIndex);
-        UserAvatar userAvatar = ua.getCurrentAvatar();
+        UserAccount userAccount = dls.userAccount;
+        //update the frontend's metadata
+        dataLink.transmit(new UpdateMetaDataInstructionDatum(userAccount.buildMetadata()));
+        userAccount.setCurrentAvatar(userAvatarIndex);
+        UserAvatar userAvatar = userAccount.getCurrentAvatar();
         GameZone gz;
         ZoneCoordinate zc = userAvatar.getAt();
         ZoneSession zs = get(zc);
@@ -119,7 +120,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         if ( //attempt to preserve location and player position
                 zk != null && //if the player has any memory
                         (DefinitionsManager.getTravelMap().isStaticLocation(zc) ||  //and either he is at a static location like a town
-                                zk.getGameZoneSerialID() == gz.getSerialID()) //or he is reconnecting to an existing game zone with the same serial ID as the last zone he was logged in to
+                                zk.getGameZoneCreationChecksum() == gz.getCreationCheckSum()) //or he is reconnecting to an existing game with a matching creation checksum.
         ) {
             zk.preserveKnowledge(gz); //preserve knowledge
             userAvatar.restoreLastActorLocation(); //and restore position information
@@ -137,12 +138,13 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
         addActorAsList.add(addActor);
         dataLink.transmit(
                 new GameZoneUpdateInstructionDatum(
-                        gz.getCheckSum(),
+                        gz.getUpdateCheckSum(),
                         addActorAsList
                 )
         );
-        LiveLog.log("Connected user " + ua.getName() + " to GameZone at " + zc, INFO);
-        return userActor.getSerialID();
+        //finally, send the frontend a datum specifying which actor serial ID in its gamezone belongs to it
+        dataLink.transmit(new IdentifyAvatarAndActorInstructionDatum(userActor.getSerialID(), userAvatarIndex));
+        LiveLog.log("Connected user " + userAccount.getName() + " to GameZone at " + zc, INFO);
     }
 
     /**
@@ -167,12 +169,12 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
      */
     void transferLinkToNewZone(DataLink dataLink) {
         disconnectLinkFromZone(dataLink);
+        UserAccount userAccount = get(dataLink).userAccount;
         //since we are transferring zones, not fully disconnecting with the expectation that we might later reconnect
         //to the same zone, we clear the avatar's memory of its actor's last position so that the new game zone can
         //determine proper placement.
-        get(dataLink).userAccount.getCurrentAvatar().saveLastActorLocation();
+        userAccount.getCurrentAvatar().saveLastActorLocation();
         DataLinkSession dls = get(dataLink);
-        dataLink.transmit(new UpdateMetaDataInstructionDatum(dls.userAccount.buildMetadata()));
         connectLinkToZone(dataLink, dls.userAccount.getCurrentAvatarIndex());
     }
 
@@ -200,6 +202,7 @@ public class DataLinkToZoneAggregator implements DataLinkAggregator{
             String username = dls.userAccount.getName();
             connectedUserNames.remove(username);
             logMessageBuilder.append("from user \"" + username + "\". ");
+            dls.userAccount.getCurrentAvatar().setActor(null); //clear the avatar's actor
             dls.userAccount.save(); //save the user account
             dls.userAccount = null;
         } else {

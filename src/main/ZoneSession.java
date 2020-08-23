@@ -8,7 +8,6 @@ import gamestate.coordinates.ZoneCoordinate;
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameProjectile;
 import link.instructions.GameZoneUpdateInstructionDatum;
-import user.ZoneKnowledge;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -55,7 +54,7 @@ public class ZoneSession {
             }
             //transmit all updates on all data links connected to this zone processor
             for (DataLinkSession dln : linkNodes)
-                dln.LINK.transmit(new GameZoneUpdateInstructionDatum(GAME_ZONE.getCheckSum(), turnUpdates));
+                dln.LINK.transmit(new GameZoneUpdateInstructionDatum(GAME_ZONE.getUpdateCheckSum(), turnUpdates));
         }
     }
     boolean expired = false; //flag for the engine to purge this zone on audit if it remains unconnected

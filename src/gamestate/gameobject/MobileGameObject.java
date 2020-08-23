@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 public abstract class MobileGameObject extends SerialGameObject {
 
+    public static final double FACING_NORTH = 3.0 * Math.PI / 2.0;
+
     /**
      * This object's exact position in its current zone.
      */
@@ -15,7 +17,7 @@ public abstract class MobileGameObject extends SerialGameObject {
     /**
      * The current facing of this mobile object, in radians.
      */
-    private double facing = 0.0;
+    private double facing = FACING_NORTH; //default to north
 
     /**
      * @return the current point coordinate this mobile object is centered on.

@@ -121,20 +121,7 @@ public class BackendDataHandler extends DataHandler {
                         );
             }
             //Here, engine selects the specified avatar from its account, then places an appropriate actor in its gamezone
-            int actorID = Engine.getInstance().connectUserAvatar(responseLink, avatarIndex);
-            //update the frontend's metadata
-            responseLink.transmit(
-                    new UpdateMetaDataInstructionDatum(
-                            loggedInAccount.buildMetadata()
-                    )
-            );
-            //finally, send the frontend a datum specifying which actor serial ID in its gamezone belongs to it
-            responseLink.transmit(
-                    new IdentifyAvatarAndActorInstructionDatum(
-                            actorID,
-                            avatarIndex
-                    )
-            );
+            Engine.getInstance().connectUserAvatar(responseLink, avatarIndex);
         } else if (instructionDatum instanceof UpdatePlayerMemoryInstructionDatum){
             UpdatePlayerMemoryInstructionDatum upmid = (UpdatePlayerMemoryInstructionDatum)instructionDatum;
             ZoneKnowledge zk = Engine.getInstance().getZoneKnowledge(responseLink);

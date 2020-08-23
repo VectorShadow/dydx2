@@ -7,7 +7,6 @@ import gamestate.coordinates.Coordinate;
 import gamestate.gameobject.GameActor;
 import gamestate.gameobject.GameProjectile;
 import gamestate.gameobject.MobileGameObject;
-import gamestate.gameobject.SerialGameObject;
 import gamestate.terrain.TerrainTile;
 import main.LogHub;
 import java.lang.reflect.InvocationTargetException;
@@ -20,9 +19,7 @@ import java.util.Map;
  * GameZones represent towns, fields, dungeons, and other such areas of a game to which one or more players
  * may be connected, and on which all game activity occurs.
  */
-public class GameZone extends SerialGameObject {
-
-    private static int serialCount = 1;
+public class GameZone extends TransmittableGameAsset {
 
     /**
      * Specify the size of the GameZone.
@@ -67,7 +64,8 @@ public class GameZone extends SerialGameObject {
      */
     final Map PROJECTILE_MAP;
 
-    private int checkSum = 0;
+    private int creationCheckSum = 0;
+    private int updateCheckSum = 0;
 
     GameZone(int height, int width) {
         ROWS = height;
@@ -129,6 +127,10 @@ public class GameZone extends SerialGameObject {
         return ROWS;
     }
 
+    public void incrementCreationChecksum(int value) {
+        creationCheckSum += value;
+    }
+
     private GameActor lookupActor(Integer serialID) {
         return (GameActor) ACTOR_MAP.get(serialID);
     }
@@ -137,8 +139,12 @@ public class GameZone extends SerialGameObject {
         return (GameProjectile) PROJECTILE_MAP.get(serialID);
     }
 
-    public int getCheckSum() {
-        return checkSum;
+    public int getCreationCheckSum() {
+        return creationCheckSum;
+    }
+
+    public int getUpdateCheckSum() {
+        return updateCheckSum;
     }
 
     public ArrayList<GameActor> getActorList() {
@@ -209,7 +215,8 @@ public class GameZone extends SerialGameObject {
 
     /**
      * Place an actor which does not currently have a point coordinate into this zone.
-     * @param gameActor
+     * This should only be used to place player actors - NPCs should have their locations set prior to being added,
+     * ideally during zone generation.
      */
     private void placeActor(GameActor gameActor){
         if (gameActor.getTravelFlag() >= 0) {
@@ -217,11 +224,12 @@ public class GameZone extends SerialGameObject {
             gameActor.setAt(travelFrom(gameActor.getTravelFlag()));
             //then clear the travel flag
             gameActor.setTravelFlag(-1);
-        } else {
-            //todo - for now, this is a hack. In the future, we should find a good way of doing this - spawn enemies in
-            // appropriate regions
-            Coordinate centerTile = new Coordinate(COLUMNS / 2, ROWS / 2);
-            gameActor.setAt(PointCoordinate.centerOf(centerTile));
+        } else { //find the first valid travel point and place our actor there.
+            for (Coordinate coordinate : TRAVEL_POINTS.TRAVEL_TILE_COORDINATES)
+                if (coordinate != null) {
+                    gameActor.setAt(PointCoordinate.centerOf(coordinate));
+                    return;
+                }
         }
     }
 
@@ -305,7 +313,7 @@ public class GameZone extends SerialGameObject {
     public void apply(GameZoneUpdate update) {
         try {
             update.invoke(this);
-            ++checkSum;
+            ++updateCheckSum;
         } catch (IllegalAccessException e) {
             LogHub.logFatalCrash("Update failure - IllegalAccessException", e);
         } catch (InvocationTargetException e) {
@@ -315,11 +323,6 @@ public class GameZone extends SerialGameObject {
         }
         //test
         invariant();
-    }
-
-    @Override
-    protected int nextSerialID() {
-        return serialCount++;
     }
 
     /**
@@ -333,7 +336,7 @@ public class GameZone extends SerialGameObject {
      */
     @Override
     public boolean equals(Object o) {
-        return o instanceof GameZone && ((GameZone) o).serialID == serialID;
+        return o instanceof GameZone && ((GameZone) o).creationCheckSum == creationCheckSum;
     }
 
     public PointCoordinate travelFrom(int sourceTravelPermission) {

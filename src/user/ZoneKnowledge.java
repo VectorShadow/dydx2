@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class ZoneKnowledge extends TransmittableGameAsset {
 
 
-    private final int GAME_ZONE_SERIAL_ID;
+    private final int GAME_ZONE_CREATION_CHECKSUM;
     private final int ZONE_COLUMNS;
     private final int ZONE_ROWS;
 
@@ -21,7 +21,7 @@ public class ZoneKnowledge extends TransmittableGameAsset {
     private int memoryChecksum = 0;
 
     public ZoneKnowledge(GameZone gameZone) {
-        GAME_ZONE_SERIAL_ID = gameZone.getSerialID();
+        GAME_ZONE_CREATION_CHECKSUM = gameZone.getCreationCheckSum();
         ZONE_COLUMNS = gameZone.countColumns();
         ZONE_ROWS = gameZone.countRows();
         rememberedTiles = new boolean[ZONE_ROWS][ZONE_COLUMNS];
@@ -38,8 +38,8 @@ public class ZoneKnowledge extends TransmittableGameAsset {
         return memoryChecksum;
     }
 
-    public int getGameZoneSerialID() {
-        return GAME_ZONE_SERIAL_ID;
+    public int getGameZoneCreationChecksum() {
+        return GAME_ZONE_CREATION_CHECKSUM;
     }
 
     /**

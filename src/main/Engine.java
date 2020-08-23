@@ -159,10 +159,9 @@ public class Engine extends Thread {
 
     /**
      * On avatar selection: associate a data link with a zone session corresponding to the avatar's world location.
-     * @return the serialID of the actor associated with the connected account and avatar
      */
-    public int connectUserAvatar(DataLink dataLink, int userAvatarIndex) {
-        return LINK_TO_ZONE_AGGREGATOR.connectLinkToZone(dataLink, userAvatarIndex);
+    public void connectUserAvatar(DataLink dataLink, int userAvatarIndex) {
+        LINK_TO_ZONE_AGGREGATOR.connectLinkToZone(dataLink, userAvatarIndex);
     }
 
     /**
